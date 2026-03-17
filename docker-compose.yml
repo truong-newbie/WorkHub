@@ -1,0 +1,36 @@
+services:
+  # Cấu hình cho dịch vụ Cơ sở dữ liệu MySQL
+  mysql:
+    image: mysql:8.0 # Sử dụng phiên bản MySQL 8.0
+    container_name: mysql # Đặt tên cho container là 'mysql'
+    cap_add:
+      - SYS_NICE # Cấp quyền ưu tiên hệ thống để MySQL chạy ổn định hơn
+    restart: always # Tự động khởi động lại nếu bị lỗi hoặc máy tính khởi động lại
+    environment:
+      - MYSQL_DATABASE=testdb # Tạo sẵn một database tên là 'testdb'
+      - MYSQL_ROOT_PASSWORD=password # Đặt mật khẩu quản trị là 'password'
+    ports:
+      - '3306:3306' # Kết nối cổng 3306 của máy bạn vào cổng 3306 của container
+    volumes:
+      - mysql_data:/var/lib/mysql # Lưu dữ liệu vào ổ đĩa ảo để không bị mất khi xóa container
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql # Tự động chạy file script SQL khi khởi tạo
+    networks:
+      - default # Sử dụng mạng mặc định để giao tiếp với backend
+
+  # Cấu hình cho ứng dụng Java của bạn (Backend)
+  backend-service:
+    container_name: backend-service # Tên container của ứng dụng
+    build:
+      context: ./ # Tìm Dockerfile ở thư mục hiện tại để build
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Mở cổng 8080 để bạn truy cập ứng dụng từ trình duyệt
+    networks:
+      - default # Kết nối chung mạng với MySQL
+
+networks:
+  default:
+    name: backend-service # Đặt tên cho mạng nội bộ
+
+volumes:
+  mysql_data: # Khai báo ổ đĩa ảo để lưu trữ dữ liệu MySQL
