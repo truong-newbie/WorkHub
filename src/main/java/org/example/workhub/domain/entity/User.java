@@ -3,10 +3,15 @@ package org.example.workhub.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.example.workhub.constant.GenderEnum;
 import org.example.workhub.domain.entity.common.DateAuditing;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.UuidGenerator;
 
+import java.io.Serializable;
+import java.util.List;
 
 
 @AllArgsConstructor
@@ -16,31 +21,47 @@ import org.hibernate.annotations.Nationalized;
 @Builder
 @Entity
 @Table(name = "users")
-public class User extends DateAuditing {
+public class User extends DateAuditing implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-//    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(insertable = false, updatable = false, nullable = false, columnDefinition = "CHAR(36)")
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
     private String id;
-    @Column(nullable = false, unique = true)
+
+    @Column(name = "name")
     private String username;
 
-    @Column(nullable = false)
-    @JsonIgnore
+    @NotBlank(message = "email khong duoc de trong")
+    @Column(name = "email")
+    private String email;
+
+    @NotBlank(message = "password khong duoc de trong")
+    @Column(name = "password")
     private String password;
 
-    @Nationalized
-    @Column(nullable = false)
-    private String firstName;
+    @Column(name = "age")
+    private Integer age;
 
-    @Nationalized
-    @Column(nullable = false)
-    private String lastName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private GenderEnum gender;
 
-    //Link to table Role
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "refresh_token", columnDefinition = "TEXT")
+    private String refreshToken;
+
     @ManyToOne
-    @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "FK_USER_ROLE"))
+    @JoinColumn(name = "company_id")
+    private Company company;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Resume> resumes;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
 
 }
