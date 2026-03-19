@@ -20,8 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
   private final CustomUserDetailsService customUserDetailsService;
+
 
   private final JwtTokenProvider tokenProvider;
 
