@@ -14,21 +14,21 @@ public class UserPrincipal implements UserDetails {
 
 
   @JsonIgnore
-  private final String username;
+  private final String email;
 
   @JsonIgnore
   private String password;
 
   private final Collection<? extends GrantedAuthority> authorities;
 
-  public UserPrincipal(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-    this(null, username, password, authorities);
+  public UserPrincipal(String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    this(null, email, password, authorities);
   }
 
-  public UserPrincipal(String id, String username, String password,
+  public UserPrincipal(String id, String email, String password,
                        Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
-    this.username = username;
+    this.email = email;
     this.password = password;
 
     if (authorities == null) {
@@ -52,13 +52,15 @@ public class UserPrincipal implements UserDetails {
 
   @Override
   public String getUsername() {
-    return username;
+    return email;
   }
 
   @Override
   public String getPassword() {
     return password;
   }
+
+
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

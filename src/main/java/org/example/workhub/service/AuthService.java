@@ -12,12 +12,14 @@ import org.example.workhub.domain.dto.response.TokenRefreshResponseDto;
 
 public interface AuthService {
 
-  LoginResponseDto login(LoginRequestDto request);
+//  LoginResponseDto login(LoginRequestDto request);
 
   TokenRefreshResponseDto refresh(TokenRefreshRequestDto request);
 
   CommonResponseDto logout(HttpServletRequest request);
 
   RegisterResponseDto register(RegisterRequestDto req);
+
+  public LoginResponseDto login(LoginRequestDto request , HttpServletRequest httpServletRequest);
 
 }

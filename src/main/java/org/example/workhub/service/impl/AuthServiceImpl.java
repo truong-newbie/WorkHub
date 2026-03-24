@@ -15,21 +15,30 @@ import org.example.workhub.domain.dto.response.LoginResponseDto;
 import org.example.workhub.domain.dto.response.RegisterResponseDto;
 import org.example.workhub.domain.dto.response.TokenRefreshResponseDto;
 import org.example.workhub.domain.entity.User;
+import org.example.workhub.domain.entity.UserSession;
 import org.example.workhub.domain.mapper.UserMapper;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.exception.UnauthorizedException;
 import org.example.workhub.repository.RoleRepository;
+import org.example.workhub.repository.TokenBlacklistRepository;
 import org.example.workhub.repository.UserRepository;
+import org.example.workhub.repository.UserSessionRepository;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.security.jwt.JwtTokenProvider;
 import org.example.workhub.service.AuthService;
+import org.example.workhub.util.TokenBlacklistUtil;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -43,6 +52,9 @@ public class AuthServiceImpl implements AuthService {
   PasswordEncoder passwordEncoder;
   RoleRepository roleRepository;
   UserMapper userMapper;
+  UserSessionRepository userSessionRepository;
+  TokenBlacklistRepository tokenBlacklistRepository;
+
 
   @Override
   public RegisterResponseDto register(RegisterRequestDto req) {
@@ -63,21 +75,71 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public LoginResponseDto login(LoginRequestDto request) {
+  public LoginResponseDto login(LoginRequestDto request, HttpServletRequest httpServletRequest) {
     try {
+      List<UserSession> userSessions= userSessionRepository.findAllByEmail(request.getEmail());
+
+      if(!userSessions.isEmpty()){
+        for(UserSession userSession: userSessions){
+          if(userSession.getIsActive())  throw new ConflictException((ErrorMessage.Auth.ERR_ALREADY_LOGGED_IN));
+        }
+      }
+
       Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(request.getEmailOrPhone(), request.getPassword()));
+              new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
       SecurityContextHolder.getContext().setAuthentication(authentication);
+
       UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
       String accessToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.FALSE);
       String refreshToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.TRUE);
+
+      User user = userRepository.findById(userPrincipal.getId())
+              .orElseThrow(()-> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_ID , new String[]{userPrincipal.getId()}));
+
+      String ipAddress = TokenBlacklistUtil.getClientIP(httpServletRequest);
+
+
+      UserSession userSession = userSessionRepository.findByIpAddressAndEmail(ipAddress, userPrincipal.getUsername());
+
+      if (userSession == null) {
+        userSession = new UserSession();
+        userSession.setIpAddress(ipAddress);
+        userSession.setToken(accessToken);
+        userSession.setRefreshToken(refreshToken);
+        userSession.setEmail(userPrincipal.getUsername());
+        userSession.setUser(user);
+        userSession.setIsActive(true);
+      }
+      else {
+        userSession.setToken(accessToken);
+        userSession.setRefreshToken(refreshToken);
+        userSession.setIsActive(true);
+      }
+      userSessionRepository.save(userSession);
       return new LoginResponseDto(accessToken, refreshToken, userPrincipal.getId(), authentication.getAuthorities());
     } catch (InternalAuthenticationServiceException e) {
-      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_USERNAME);
+      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_EMAIL);
     } catch (BadCredentialsException e) {
       throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_PASSWORD);
     }
   }
+
+//  @Override
+//  public LoginResponseDto login(LoginRequestDto request) {
+//    try {
+//      Authentication authentication = authenticationManager.authenticate(
+//          new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+//      SecurityContextHolder.getContext().setAuthentication(authentication);
+//      UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+//      String accessToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.FALSE);
+//      String refreshToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.TRUE);
+//      return new LoginResponseDto(accessToken, refreshToken, userPrincipal.getId(), authentication.getAuthorities());
+//    } catch (InternalAuthenticationServiceException e) {
+//      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_EMAIL);
+//    } catch (BadCredentialsException e) {
+//      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_PASSWORD);
+//    }
+//  }
 
   @Override
   public TokenRefreshResponseDto refresh(TokenRefreshRequestDto request) {

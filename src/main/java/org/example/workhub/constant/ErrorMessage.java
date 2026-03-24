@@ -20,18 +20,20 @@ public class ErrorMessage {
   public static final String INVALID_PASSWORD="invalid.password";
 
   public static class Auth {
-    public static final String ERR_INCORRECT_USERNAME = "exception.auth.incorrect.username";
+    public static final String ERR_INCORRECT_EMAIL = "exception.auth.incorrect.email";
     public static final String ERR_INCORRECT_PASSWORD = "exception.auth.incorrect.password";
     public static final String ERR_ACCOUNT_NOT_ENABLED = "exception.auth.account.not.enabled";
     public static final String ERR_ACCOUNT_LOCKED = "exception.auth.account.locked";
     public static final String INVALID_REFRESH_TOKEN = "exception.auth.invalid.refresh.token";
     public static final String EXPIRED_REFRESH_TOKEN = "exception.auth.expired.refresh.token";
     public static final String ERR_ALREADY_EXISTS_EMAIL = "exception.auth.already.exists.email";
+    public static final String ERR_ALREADY_LOGGED_IN="exception.auth.already.logged";
   }
 
   public static class User {
     public static final String ERR_NOT_FOUND_USERNAME = "exception.user.not.found.username";
     public static final String ERR_NOT_FOUND_ID = "exception.user.not.found.id";
+    public static final String ERR_NOT_FOUND_EMAIL = "exception.user.not.found.email";
   }
   public static class Role{
     public static final String ERR_NOT_FOUND = "exception.role.not.found";

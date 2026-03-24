@@ -15,7 +15,7 @@ import org.example.workhub.constant.ErrorMessage;
 public class LoginRequestDto {
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
-  private String emailOrPhone;
+  private String email;
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
   private String password;
