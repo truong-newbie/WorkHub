@@ -3,7 +3,9 @@ package org.example.workhub.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,33 @@ public class AuthController {
     @PostMapping(UrlConstant.Auth.LOGIN)
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request, HttpServletRequest requestHttp) {
         return VsResponseUtil.success(authService.login(request, requestHttp));
+    }
+
+    @Operation(
+            summary = "API Logout",
+            description = "Xóa cookie chứa accessToken và refreshToken nếu có"
+    )
+    @PostMapping(UrlConstant.Auth.LOGOUT)
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        log.info("Nhận request logout");
+
+        Cookie clearAccessToken = new Cookie("accessToken", "");
+        clearAccessToken.setMaxAge(0);
+        clearAccessToken.setPath("/");
+        clearAccessToken.setHttpOnly(true);
+        clearAccessToken.setSecure(true);
+        response.addCookie(clearAccessToken);
+
+        Cookie clearRefreshToken = new Cookie("refreshToken", "");
+        clearRefreshToken.setMaxAge(0);
+        clearRefreshToken.setPath("/");
+        clearRefreshToken.setHttpOnly(true);
+        clearRefreshToken.setSecure(true);
+        response.addCookie(clearRefreshToken);
+
+        log.info("Đã xóa cookie accessToken và refreshToken");
+
+        return VsResponseUtil.success(authService.logout(request));
     }
 
 }

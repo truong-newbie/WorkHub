@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.constant.RoleConstant;
 import org.example.workhub.domain.dto.request.LoginRequestDto;
@@ -44,6 +45,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE , makeFinal = true)
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
   AuthenticationManager authenticationManager;
@@ -124,23 +126,6 @@ public class AuthServiceImpl implements AuthService {
     }
   }
 
-//  @Override
-//  public LoginResponseDto login(LoginRequestDto request) {
-//    try {
-//      Authentication authentication = authenticationManager.authenticate(
-//          new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-//      SecurityContextHolder.getContext().setAuthentication(authentication);
-//      UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-//      String accessToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.FALSE);
-//      String refreshToken = jwtTokenProvider.generateToken(userPrincipal, Boolean.TRUE);
-//      return new LoginResponseDto(accessToken, refreshToken, userPrincipal.getId(), authentication.getAuthorities());
-//    } catch (InternalAuthenticationServiceException e) {
-//      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_EMAIL);
-//    } catch (BadCredentialsException e) {
-//      throw new UnauthorizedException(ErrorMessage.Auth.ERR_INCORRECT_PASSWORD);
-//    }
-//  }
-
   @Override
   public TokenRefreshResponseDto refresh(TokenRefreshRequestDto request) {
     return null;
@@ -148,7 +133,40 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public CommonResponseDto logout(HttpServletRequest request) {
-    return null;
+    log.info("Processing logout request");
+
+    String bearerToken = request.getHeader("Authorization");
+    if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+      throw new UnauthorizedException(ErrorMessage.UNAUTHORIZED);
+    }
+
+    String token = bearerToken.substring(7);
+    log.info("Logout token: {}", token);
+
+    UserSession userSession = userSessionRepository.findByToken(token);
+    if (userSession == null) {
+      throw new UnauthorizedException(ErrorMessage.UNAUTHORIZED);
+    }
+
+    String refreshToken = userSession.getRefreshToken();
+
+    userSession.setIsActive(false);
+
+    userSessionRepository.save(userSession);
+
+    TokenBlacklistUtil.addTokenToBlacklist(token, "Logout access token", tokenBlacklistRepository);
+
+    if (refreshToken != null && !refreshToken.isBlank()) {
+      TokenBlacklistUtil.addTokenToBlacklist(
+              refreshToken,
+              "Logout refresh token",
+              tokenBlacklistRepository
+      );
+    }
+
+    SecurityContextHolder.clearContext();
+
+    return new CommonResponseDto(true, "Logged out successfully");
   }
 
 
