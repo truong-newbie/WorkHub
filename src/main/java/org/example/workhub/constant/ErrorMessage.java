@@ -16,6 +16,8 @@ public class ErrorMessage {
   public static final String INVALID_DATE = "invalid.date-format";
   public static final String INVALID_DATE_FEATURE = "invalid.date-future";
   public static final String INVALID_DATETIME = "invalid.datetime-format";
+  public static final String INVALID_EMAIL="invalid.email";
+  public static final String INVALID_PASSWORD="invalid.password";
 
   public static class Auth {
     public static final String ERR_INCORRECT_USERNAME = "exception.auth.incorrect.username";
@@ -24,11 +26,15 @@ public class ErrorMessage {
     public static final String ERR_ACCOUNT_LOCKED = "exception.auth.account.locked";
     public static final String INVALID_REFRESH_TOKEN = "exception.auth.invalid.refresh.token";
     public static final String EXPIRED_REFRESH_TOKEN = "exception.auth.expired.refresh.token";
+    public static final String ERR_ALREADY_EXISTS_EMAIL = "exception.auth.already.exists.email";
   }
 
   public static class User {
     public static final String ERR_NOT_FOUND_USERNAME = "exception.user.not.found.username";
     public static final String ERR_NOT_FOUND_ID = "exception.user.not.found.id";
+  }
+  public static class Role{
+    public static final String ERR_NOT_FOUND = "exception.role.not.found";
   }
 
 }

@@ -117,4 +117,11 @@ public class GlobalExceptionHandler {
     return VsResponseUtil.error(ex.getStatus(), message);
   }
 
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<RestData<?>> handleConflictException(ConflictException ex) {
+    String message = messageSource.getMessage(ex.getMessage(), ex.getParams() ,LocaleContextHolder.getLocale());
+    log.warn(message);
+    return VsResponseUtil.error(ex.getStatus(), message);
+  }
+
 }

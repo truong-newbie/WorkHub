@@ -2,6 +2,7 @@ package org.example.workhub.domain.mapper;
 
 
 import org.example.workhub.domain.dto.request.UserCreateDto;
+import org.example.workhub.domain.dto.response.RegisterResponseDto;
 import org.example.workhub.domain.dto.response.UserDto;
 import org.example.workhub.domain.entity.User;
 import org.mapstruct.*;
@@ -19,5 +20,7 @@ public interface UserMapper {
   UserDto toUserDto(User user);
 
   List<UserDto> toUserDtos(List<User> user);
+
+  RegisterResponseDto toRegisterDto(User user);
 
 }

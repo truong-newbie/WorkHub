@@ -7,9 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.example.workhub.constant.GenderEnum;
 import org.example.workhub.domain.entity.common.DateAuditing;
-import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UuidGenerator;
-
+import java.time.LocalDate;
 import java.io.Serializable;
 import java.util.List;
 
@@ -45,6 +44,9 @@ public class User extends DateAuditing implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private GenderEnum gender;
+
+    @Column(name =" dob" , nullable = false)
+    private LocalDate dob;
 
     @Column(name = "address")
     private String address;
