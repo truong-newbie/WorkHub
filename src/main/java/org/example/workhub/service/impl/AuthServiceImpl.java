@@ -1,6 +1,13 @@
 package org.example.workhub.service.impl;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.constant.RoleConstant;
+import org.example.workhub.domain.dto.common.GoogleProperties;
 import org.example.workhub.domain.dto.request.LoginRequestDto;
 import org.example.workhub.domain.dto.request.RegisterRequestDto;
 import org.example.workhub.domain.dto.request.TokenRefreshRequestDto;
@@ -29,12 +37,18 @@ import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.security.jwt.JwtTokenProvider;
 import org.example.workhub.service.AuthService;
 import org.example.workhub.util.TokenBlacklistUtil;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -56,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
   UserMapper userMapper;
   UserSessionRepository userSessionRepository;
   TokenBlacklistRepository tokenBlacklistRepository;
+  GoogleProperties googleProperties;
 
 
   @Override
@@ -170,5 +185,109 @@ public class AuthServiceImpl implements AuthService {
   }
 
 
+  public Map<String, Object> authenticateAndFetchProfile(String code, String loginType) throws IOException, java.io.IOException {
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+    String accessToken;
+
+    switch (loginType.toLowerCase()) {
+      case "google":
+        accessToken = new GoogleAuthorizationCodeTokenRequest(
+                new NetHttpTransport(), new GsonFactory(),
+                googleProperties.getClientId(),
+                googleProperties.getClientSecret(),
+                code,
+                googleProperties.getRedirectUri()
+        ).execute().getAccessToken();
+        break;
+
+      default:
+        return null;
+    }
+
+    // Gọi API lấy user info từ Google
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(accessToken);
+
+    HttpEntity<?> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<String> response = restTemplate.exchange(
+            googleProperties.getUserInfoUri(), // ví dụ: https://www.googleapis.com/oauth2/v2/userinfo
+            HttpMethod.GET,
+            entity,
+            String.class
+    );
+
+    /// Parse JSON → Map
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> userInfo = objectMapper.readValue(
+            response.getBody(),
+            new TypeReference<Map<String, Object>>() {}
+    );
+
+    return userInfo;
+  }
+
+  @Override
+  public String generateAuthUrl(String loginType) {
+
+    if ("google".equals(loginType)) {
+      return "https://accounts.google.com/o/oauth2/v2/auth"
+              + "?client_id=" + googleProperties.getClientId()
+              + "&redirect_uri=" + googleProperties.getRedirectUri()
+              + "&response_type=code"
+              + "&scope=openid%20email%20profile";
+    }
+
+    return null;
+  }
+
+  @Override
+  public LoginResponseDto socialLogin(LoginRequestDto request, HttpServletRequest httpServletRequest) {
+
+    // tìm user theo email
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow( ()->  new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_EMAIL));
+    // nếu chưa có thì tạo moi
+    if (user == null) {
+      user = new User();
+      user.setEmail(request.getEmail());
+      user.setUsername(request.getFullname());
+      user.setPassword(""); // không dùng password
+      user.setRole(roleRepository.findByName(RoleConstant.CANDIDATE)
+              .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND,
+                      new String[]{RoleConstant.CANDIDATE})));
+
+      user = userRepository.save(user);
+    }
+
+    // tạo UserPrincipal
+    UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+    //  Generate token
+    String accessToken = jwtTokenProvider.generateToken(userPrincipal, false);
+    String refreshToken = jwtTokenProvider.generateToken(userPrincipal, true);
+
+    //  Lưu session
+    String ipAddress = TokenBlacklistUtil.getClientIP(httpServletRequest);
+
+    UserSession userSession = userSessionRepository.findByIpAddressAndEmail(ipAddress, user.getEmail());
+
+    if (userSession == null) {
+      userSession = new UserSession();
+      userSession.setIpAddress(ipAddress);
+      userSession.setEmail(user.getEmail());
+      userSession.setUser(user);
+    }
+
+    userSession.setToken(accessToken);
+    userSession.setRefreshToken(refreshToken);
+    userSession.setIsActive(true);
+
+    userSessionRepository.save(userSession);
+
+    return new LoginResponseDto(accessToken, refreshToken, user.getId(), userPrincipal.getAuthorities());
+  }
 
 }

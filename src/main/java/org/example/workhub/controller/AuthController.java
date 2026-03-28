@@ -22,8 +22,13 @@ import org.example.workhub.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.IOException;
+import java.util.Map;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -80,5 +85,59 @@ public class AuthController {
 
         return VsResponseUtil.success(authService.logout(request));
     }
+
+    @GetMapping(UrlConstant.Auth.LOGIN_GOOGLE)    // fix lai trong url constant
+    public ResponseEntity<String> socialAuth(
+            @RequestParam("login_type") String loginType,
+            HttpServletRequest httpServletRequest
+    ){
+        loginType= loginType.trim().toLowerCase();     //bo khoang trang va chuyen chu thuong
+        String url = authService.generateAuthUrl(loginType);    return ResponseEntity.ok(url);
+    }
+
+    @GetMapping(UrlConstant.Auth.REDIRECT_GOOGLE)
+    public ResponseEntity<?> callback(
+            @RequestParam("code") String code,
+            @RequestParam("login_type") String loginType,
+            HttpServletRequest request
+    ) throws IOException {
+
+        loginType = loginType == null ? "" : loginType.trim().toLowerCase();
+
+        Map<String, Object> userInfo = authService.authenticateAndFetchProfile(code, loginType);
+
+        if (userInfo == null) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, "Failed to authenticate");
+        }
+
+        String accountId = "";
+        String name = "";
+        String picture = "";
+        String email = "";
+
+        if ("google".equals(loginType)) {
+            accountId = (String) userInfo.getOrDefault("sub", "");
+            name = (String) userInfo.getOrDefault("name", "");
+            picture = (String) userInfo.getOrDefault("picture", "");
+            email = (String) userInfo.getOrDefault("email", "");
+        }
+
+        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
+                .email(email)
+                .fullname(name)
+                .profileImage(picture)
+                .build();
+
+        if ("google".equals(loginType)) {
+            loginRequestDto.setGoogleAccountId(accountId);
+        }
+
+        LoginResponseDto response = authService.socialLogin(loginRequestDto, request);
+
+        return VsResponseUtil.success(response);
+    }
+
+
+
 
 }
