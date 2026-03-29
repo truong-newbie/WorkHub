@@ -86,7 +86,7 @@ public class AuthController {
         return VsResponseUtil.success(authService.logout(request));
     }
 
-    @GetMapping(UrlConstant.Auth.LOGIN_GOOGLE)    // fix lai trong url constant
+    @GetMapping(UrlConstant.Auth.GOOGLE_AUTHORIZE)    // fix lai trong url constant
     public ResponseEntity<String> socialAuth(
             @RequestParam("login_type") String loginType,
             HttpServletRequest httpServletRequest
@@ -95,10 +95,10 @@ public class AuthController {
         String url = authService.generateAuthUrl(loginType);    return ResponseEntity.ok(url);
     }
 
-    @GetMapping(UrlConstant.Auth.REDIRECT_GOOGLE)
+    @GetMapping(UrlConstant.Auth.GOOGLE_CALLBACK)
     public ResponseEntity<?> callback(
             @RequestParam("code") String code,
-            @RequestParam("login_type") String loginType,
+            @RequestParam(value = "state", required = false) String loginType,
             HttpServletRequest request
     ) throws IOException {
 

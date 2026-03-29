@@ -191,6 +191,8 @@ public class AuthServiceImpl implements AuthService {
 
     String accessToken;
 
+    if (loginType == null) return null;
+
     switch (loginType.toLowerCase()) {
       case "google":
         accessToken = new GoogleAuthorizationCodeTokenRequest(
@@ -219,13 +221,13 @@ public class AuthServiceImpl implements AuthService {
             String.class
     );
 
-    /// Parse JSON → Map
+    // Parse JSON → Map
     ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> userInfo = objectMapper.readValue(
             response.getBody(),
             new TypeReference<Map<String, Object>>() {}
     );
-
+    System.out.println(userInfo);
     return userInfo;
   }
 
@@ -237,7 +239,8 @@ public class AuthServiceImpl implements AuthService {
               + "?client_id=" + googleProperties.getClientId()
               + "&redirect_uri=" + googleProperties.getRedirectUri()
               + "&response_type=code"
-              + "&scope=openid%20email%20profile";
+              + "&scope=openid%20email%20profile"
+              + "&state=google";
     }
 
     return null;
@@ -246,21 +249,19 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public LoginResponseDto socialLogin(LoginRequestDto request, HttpServletRequest httpServletRequest) {
 
-    // tìm user theo email
     User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow( ()->  new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_EMAIL));
-    // nếu chưa có thì tạo moi
-    if (user == null) {
-      user = new User();
-      user.setEmail(request.getEmail());
-      user.setUsername(request.getFullname());
-      user.setPassword(""); // không dùng password
-      user.setRole(roleRepository.findByName(RoleConstant.CANDIDATE)
-              .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND,
-                      new String[]{RoleConstant.CANDIDATE})));
-
-      user = userRepository.save(user);
-    }
+            .orElseGet(() -> {
+              User newUser = new User();
+              newUser.setEmail(request.getEmail());
+              newUser.setUsername(request.getFullname());
+              newUser.setPassword(""); // không dùng password
+              newUser.setRole(roleRepository.findByName(RoleConstant.CANDIDATE)
+                      .orElseThrow(() -> new NotFoundException(
+                              ErrorMessage.Role.ERR_NOT_FOUND,
+                              new String[]{RoleConstant.CANDIDATE}
+                      )));
+              return userRepository.save(newUser);
+            });
 
     // tạo UserPrincipal
     UserPrincipal userPrincipal = UserPrincipal.create(user);

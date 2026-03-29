@@ -8,8 +8,8 @@ public class UrlConstant {
     public static final String REGISTER = PRE_FIX + "/register";
     public static final String LOGIN = PRE_FIX + "/login";
     public static final String LOGOUT = PRE_FIX + "/logout";
-    public static final String LOGIN_GOOGLE = PRE_FIX + "/social-login";
-    public static final String REDIRECT_GOOGLE = PRE_FIX + "/callback";
+    public static final String GOOGLE_AUTHORIZE = PRE_FIX + "/google/authorize";
+    public static final String GOOGLE_CALLBACK = PRE_FIX + "/google/callback";
 
     private Auth() {
     }
