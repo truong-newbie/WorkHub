@@ -45,7 +45,7 @@ public class User extends DateAuditing implements Serializable {
     @Column(name = "gender")
     private GenderEnum gender;
 
-    @Column(name =" dob" , nullable = false)
+    @Column(name =" dob" )
     private LocalDate dob;
 
     @Column(name = "address")
@@ -57,6 +57,9 @@ public class User extends DateAuditing implements Serializable {
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
+
+    private String provider;   // GOOGLE / FACEBOOK
+    private String providerId;    // sub / id
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore

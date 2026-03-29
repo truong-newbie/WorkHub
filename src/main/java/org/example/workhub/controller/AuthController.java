@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -86,7 +87,7 @@ public class AuthController {
         return VsResponseUtil.success(authService.logout(request));
     }
 
-    @GetMapping(UrlConstant.Auth.GOOGLE_AUTHORIZE)    // fix lai trong url constant
+    @GetMapping(UrlConstant.Auth.OAUTH2_AUTHORIZE)
     public ResponseEntity<String> socialAuth(
             @RequestParam("login_type") String loginType,
             HttpServletRequest httpServletRequest
@@ -95,9 +96,9 @@ public class AuthController {
         String url = authService.generateAuthUrl(loginType);    return ResponseEntity.ok(url);
     }
 
-    @GetMapping(UrlConstant.Auth.GOOGLE_CALLBACK)
+    @GetMapping(UrlConstant.Auth.OAUTH2_CALLBACK)
     public ResponseEntity<?> callback(
-            @RequestParam("code") String code,
+            @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "state", required = false) String loginType,
             HttpServletRequest request
     ) throws IOException {
@@ -115,23 +116,45 @@ public class AuthController {
         String picture = "";
         String email = "";
 
-        if ("google".equals(loginType)) {
-            accountId = (String) userInfo.getOrDefault("sub", "");
-            name = (String) userInfo.getOrDefault("name", "");
-            picture = (String) userInfo.getOrDefault("picture", "");
-            email = (String) userInfo.getOrDefault("email", "");
+        if (loginType.trim().equals("google")) {
+            accountId = (String) Objects.requireNonNullElse(userInfo.get("sub"), "");
+            name = (String) Objects.requireNonNullElse(userInfo.get("name"), "");
+            picture = (String) Objects.requireNonNullElse(userInfo.get("picture"), "");
+            email = (String) Objects.requireNonNullElse(userInfo.get("email"), "");
+        } else if (loginType.trim().equals("facebook")) {
+            accountId = (String) Objects.requireNonNullElse(userInfo.get("id"), "");
+            name = (String) Objects.requireNonNullElse(userInfo.get("name"), "");
+            email = (String) Objects.requireNonNullElse(userInfo.get("email"), "");
+
+            // Lấy URL ảnh từ cấu trúc dữ liệu của Facebook
+            Object pictureObj = userInfo.get("picture");
+            if (pictureObj instanceof Map) {
+                Map<?, ?> pictureData = (Map<?, ?>) pictureObj;
+                Object dataObj = pictureData.get("data");
+                if (dataObj instanceof Map) {
+                    Map<?, ?> dataMap = (Map<?, ?>) dataObj;
+                    Object urlObj = dataMap.get("url");
+                    if(urlObj instanceof String) {
+                        picture = (String) urlObj;
+                    }
+                }
+            }
         }
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
                 .email(email)
                 .fullname(name)
+                .password("")
                 .profileImage(picture)
                 .build();
 
-        if ("google".equals(loginType)) {
+        if (loginType.trim().equals("google")) {
             loginRequestDto.setGoogleAccountId(accountId);
+//            loginRequestDto.setFacebookAccountId("");           // trong truong hop facebook va google trung email
+        } else if (loginType.trim().equals("facebook")) {
+            loginRequestDto.setFacebookAccountId(accountId);
+//            loginRequestDto.setGoogleAccountId("");
         }
-
         LoginResponseDto response = authService.socialLogin(loginRequestDto, request);
 
         return VsResponseUtil.success(response);

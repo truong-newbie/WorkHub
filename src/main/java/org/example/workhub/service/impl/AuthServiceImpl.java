@@ -3,6 +3,7 @@ package org.example.workhub.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -15,7 +16,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.constant.RoleConstant;
+import org.example.workhub.domain.dto.common.FacebookProperties;
+import org.example.workhub.domain.dto.common.FacebookProviderProperties;
 import org.example.workhub.domain.dto.common.GoogleProperties;
+import org.example.workhub.domain.dto.common.GoogleProviderProperties;
 import org.example.workhub.domain.dto.request.LoginRequestDto;
 import org.example.workhub.domain.dto.request.RegisterRequestDto;
 import org.example.workhub.domain.dto.request.TokenRefreshRequestDto;
@@ -37,21 +41,15 @@ import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.security.jwt.JwtTokenProvider;
 import org.example.workhub.service.AuthService;
 import org.example.workhub.util.TokenBlacklistUtil;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
+import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +69,9 @@ public class AuthServiceImpl implements AuthService {
   UserSessionRepository userSessionRepository;
   TokenBlacklistRepository tokenBlacklistRepository;
   GoogleProperties googleProperties;
+  GoogleProviderProperties googleProviderProperties;
+  FacebookProperties facebookProperties;
+  FacebookProviderProperties facebookProviderProperties;
 
 
   @Override
@@ -202,45 +203,71 @@ public class AuthServiceImpl implements AuthService {
                 code,
                 googleProperties.getRedirectUri()
         ).execute().getAccessToken();
-        break;
+
+        // Configure RestTemplate to include the access token in the Authorization header
+        restTemplate.getInterceptors().add((req, body, executionContext) -> {
+          req.getHeaders().set("Authorization", "Bearer " + accessToken);
+          return executionContext.execute(req, body);
+        });
+
+        // Make a GET request to fetch user information
+        return new ObjectMapper().readValue(
+                restTemplate.getForEntity(googleProviderProperties.getUserInfoUri(), String.class).getBody(),
+                new TypeReference<>() {}
+        );
+        //break;
+
+      case "facebook":
+        // Facebook token request setup
+        String urlGetAccessToken = UriComponentsBuilder
+                .fromUriString(facebookProviderProperties.getTokenUri())
+                .queryParam("client_id", facebookProperties.getClientId())
+                .queryParam("redirect_uri", facebookProperties.getRedirectUri())
+                .queryParam("client_secret", facebookProperties.getClientSecret())
+                .queryParam("code", code)
+                .toUriString();
+
+        // Use RestTemplate to fetch the Facebook access token
+        ResponseEntity<String> response = restTemplate.getForEntity(urlGetAccessToken, String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(response.getBody());
+        accessToken = node.get("access_token").asText();
+
+        // Set the URL for the Facebook API to fetch user info
+        // Lấy thông tin người dùng
+        String userInfoUri = facebookProviderProperties.getUserInfoUri() + "&access_token=" + accessToken;
+        return mapper.readValue(
+                restTemplate.getForEntity(userInfoUri, String.class).getBody(),
+                new TypeReference<>() {}
+        );
+        //break;
 
       default:
+        System.out.println("Unsupported login type: " + loginType);
         return null;
     }
 
-    // Gọi API lấy user info từ Google
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(accessToken);
-
-    HttpEntity<?> entity = new HttpEntity<>(headers);
-
-    ResponseEntity<String> response = restTemplate.exchange(
-            googleProperties.getUserInfoUri(), // ví dụ: https://www.googleapis.com/oauth2/v2/userinfo
-            HttpMethod.GET,
-            entity,
-            String.class
-    );
-
-    // Parse JSON → Map
-    ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, Object> userInfo = objectMapper.readValue(
-            response.getBody(),
-            new TypeReference<Map<String, Object>>() {}
-    );
-    System.out.println(userInfo);
-    return userInfo;
   }
 
   @Override
   public String generateAuthUrl(String loginType) {
 
-    if ("google".equals(loginType)) {
+    if ("google".equalsIgnoreCase(loginType)) {
       return "https://accounts.google.com/o/oauth2/v2/auth"
               + "?client_id=" + googleProperties.getClientId()
               + "&redirect_uri=" + googleProperties.getRedirectUri()
               + "&response_type=code"
               + "&scope=openid%20email%20profile"
               + "&state=google";
+    }
+
+    if ("facebook".equalsIgnoreCase(loginType)) {
+      return "https://www.facebook.com/v18.0/dialog/oauth"
+              + "?client_id=" + facebookProperties.getClientId()
+              + "&redirect_uri=" + facebookProperties.getRedirectUri()
+              + "&response_type=code"
+              + "&scope=email,public_profile"
+              + "&state=facebook";
     }
 
     return null;
@@ -254,15 +281,32 @@ public class AuthServiceImpl implements AuthService {
               User newUser = new User();
               newUser.setEmail(request.getEmail());
               newUser.setUsername(request.getFullname());
-              newUser.setPassword(""); // không dùng password
+              newUser.setPassword("SOCIAL_LOGIN"); // không dùng password
               newUser.setRole(roleRepository.findByName(RoleConstant.CANDIDATE)
                       .orElseThrow(() -> new NotFoundException(
                               ErrorMessage.Role.ERR_NOT_FOUND,
                               new String[]{RoleConstant.CANDIDATE}
                       )));
+
+              if (request.getGoogleAccountId() != null) {
+                newUser.setProvider("GOOGLE");
+                newUser.setProviderId(request.getGoogleAccountId());
+              } else if (request.getFacebookAccountId() != null) {
+                newUser.setProvider("FACEBOOK");
+                newUser.setProviderId(request.getFacebookAccountId());
+              }
               return userRepository.save(newUser);
             });
 
+    if (user.getProvider() != null) {
+      if (request.getGoogleAccountId() != null && !"GOOGLE".equals(user.getProvider())) {
+        throw new ConflictException("Email đã đăng ký bằng phương thức khác");
+      }
+
+      if (request.getFacebookAccountId() != null && !"FACEBOOK".equals(user.getProvider())) {
+        throw new ConflictException("Email đã đăng ký bằng phương thức khác");
+      }
+    }
     // tạo UserPrincipal
     UserPrincipal userPrincipal = UserPrincipal.create(user);
 
