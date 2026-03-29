@@ -1,6 +1,7 @@
 package org.example.workhub.repository;
 
 
+import jakarta.validation.constraints.NotBlank;
 import org.example.workhub.constant.ErrorMessage;
 
 import org.example.workhub.domain.entity.User;
@@ -27,4 +28,7 @@ public interface UserRepository extends JpaRepository<User, String> {
             new String[]{currentUser.getUsername()}));
   }
 
+  boolean existsByEmail(@NotBlank(message = "email khong duoc de trong") String email);
+
+  Optional<User> findByEmail(String email);
 }

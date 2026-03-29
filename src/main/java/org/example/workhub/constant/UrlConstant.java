@@ -3,10 +3,13 @@ package org.example.workhub.constant;
 public class UrlConstant {
 
   public static class Auth {
-    private static final String PRE_FIX = "/auth";
 
+    private static final String PRE_FIX = "/auth";
+    public static final String REGISTER = PRE_FIX + "/register";
     public static final String LOGIN = PRE_FIX + "/login";
     public static final String LOGOUT = PRE_FIX + "/logout";
+    public static final String OAUTH2_AUTHORIZE = PRE_FIX + "/oauth2/authorize";
+    public static final String OAUTH2_CALLBACK = PRE_FIX + "/oauth2/callback";
 
     private Auth() {
     }

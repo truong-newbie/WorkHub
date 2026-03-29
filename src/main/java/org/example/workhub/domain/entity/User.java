@@ -7,9 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.example.workhub.constant.GenderEnum;
 import org.example.workhub.domain.entity.common.DateAuditing;
-import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UuidGenerator;
-
+import java.time.LocalDate;
 import java.io.Serializable;
 import java.util.List;
 
@@ -46,6 +45,9 @@ public class User extends DateAuditing implements Serializable {
     @Column(name = "gender")
     private GenderEnum gender;
 
+    @Column(name =" dob" )
+    private LocalDate dob;
+
     @Column(name = "address")
     private String address;
 
@@ -55,6 +57,9 @@ public class User extends DateAuditing implements Serializable {
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
+
+    private String provider;   // GOOGLE / FACEBOOK
+    private String providerId;    // sub / id
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore

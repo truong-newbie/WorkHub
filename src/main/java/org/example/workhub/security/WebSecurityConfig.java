@@ -35,9 +35,12 @@ public class WebSecurityConfig {
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/api/v1/auth/**", "/auth/**").permitAll()
                     .anyRequest().authenticated()
             )
+//            .oauth2Login(oauth -> oauth
+//                    .successHandler(successHandler)
+//            );
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
@@ -47,9 +50,7 @@ public class WebSecurityConfig {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
     corsConfiguration.addAllowedOrigin("*");
     corsConfiguration.addAllowedHeader("*");
-    corsConfiguration.addAllowedMethod(HttpMethod.PATCH);
-    corsConfiguration.addAllowedMethod(HttpMethod.PUT);
-    corsConfiguration.addAllowedMethod(HttpMethod.DELETE);
+    corsConfiguration.addAllowedMethod("*");
     return corsConfiguration;
   }
 

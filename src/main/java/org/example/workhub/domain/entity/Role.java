@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Role extends FlagUserDateAuditing implements Serializable {
+public class Role  {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,10 +42,9 @@ public class Role extends FlagUserDateAuditing implements Serializable {
   private List<User> users;
 
 
-  public Role(String roleName, String description, boolean active, List<Permission> permissionList) {
+  public Role(String roleName, String description, List<Permission> permissionList) {
     this.name = roleName;
     this.description = description;
-    this.setActiveFlag(active);
     this.permissions = permissionList;
   }
 
