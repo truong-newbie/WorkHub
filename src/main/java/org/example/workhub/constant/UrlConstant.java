@@ -32,4 +32,10 @@ public class UrlConstant {
     }
   }
 
+  public static class Company{
+    public static final String COMPANY_BASE = "/company";
+    public static final String ID = COMPANY_BASE+"/{id}";
+    public static final String ME = COMPANY_BASE+"/me";
+  }
+
 }

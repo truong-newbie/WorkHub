@@ -41,5 +41,9 @@ public class ErrorMessage {
   public static class Role{
     public static final String ERR_NOT_FOUND = "exception.role.not.found";
   }
+  public static class Company{
+    public static final String ERR_NOT_FOUND = "exception.company.not.found";
+    public static final String ERR_ALREADY_EXISTS_COMPANY = "exception.company.already.exists.company";
+  }
 
 }
