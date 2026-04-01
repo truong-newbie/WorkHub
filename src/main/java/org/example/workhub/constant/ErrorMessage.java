@@ -18,6 +18,9 @@ public class ErrorMessage {
   public static final String INVALID_DATETIME = "invalid.datetime-format";
   public static final String INVALID_EMAIL="invalid.email";
   public static final String INVALID_PASSWORD="invalid.password";
+  public static final String INVALID_OTP= "invalid.otp";
+  public static final String OTP_EXPIRED= "otp.expired";
+  public static final String INVALID_REPEAT_PASSWORD="invalid.repeat.password";
 
   public static class Auth {
     public static final String ERR_INCORRECT_EMAIL = "exception.auth.incorrect.email";

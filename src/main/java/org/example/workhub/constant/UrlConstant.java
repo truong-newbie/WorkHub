@@ -2,6 +2,12 @@ package org.example.workhub.constant;
 
 public class UrlConstant {
 
+  public static class ForgotPassword {
+    public static final String PREFIX= "/forgot-password";
+    public static final String VERIFY_EMAIL =PREFIX+ "/email-verification/{email}";
+    public static final String VERIFY_OTP = PREFIX+"/otp-verification";
+    public static final String RESET_PASSWORD =PREFIX+ "/password-update/{email}";
+  }
   public static class Auth {
 
     private static final String PRE_FIX = "/auth";

@@ -69,4 +69,7 @@ public class User extends DateAuditing implements Serializable {
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @OneToOne(mappedBy = "user")
+    private ForgotPassword forgotPassword;
+
 }

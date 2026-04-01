@@ -89,6 +89,14 @@ public class GlobalExceptionHandler {
     return VsResponseUtil.error(ex.getStatus(), message);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<RestData<?>> handleBadRequest(BadRequestException ex) {
+    log.error(ex.getMessage(), ex);
+    String message = messageSource.getMessage(ex.getMessage(), ex.getParams(), LocaleContextHolder.getLocale());
+    return VsResponseUtil.error(ex.getStatus(), message);
+
+  }
+
   @ExceptionHandler(InternalServerException.class)
   public ResponseEntity<RestData<?>> handlerInternalServerException(InternalServerException ex) {
     String message = messageSource.getMessage(ex.getMessage(), ex.getParams(), LocaleContextHolder.getLocale());
