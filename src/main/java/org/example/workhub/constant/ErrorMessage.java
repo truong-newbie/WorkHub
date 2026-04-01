@@ -37,9 +37,11 @@ public class ErrorMessage {
     public static final String ERR_NOT_FOUND_USERNAME = "exception.user.not.found.username";
     public static final String ERR_NOT_FOUND_ID = "exception.user.not.found.id";
     public static final String ERR_NOT_FOUND_EMAIL = "exception.user.not.found.email";
+    public static final String ERR_EXISTS_EMAIL = "exception.user.already.exist.email";
+
   }
   public static class Role{
-    public static final String ERR_NOT_FOUND = "exception.role.not.found";
+    public static final String ERR_NOT_FOUND_ROLE = "exception.role.not.found";
   }
 
 }

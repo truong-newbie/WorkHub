@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.workhub.constant.ErrorMessage;
-
-
+import org.example.workhub.constant.GenderEnum;
 
 
 @AllArgsConstructor
@@ -17,18 +16,23 @@ import org.example.workhub.constant.ErrorMessage;
 @Getter
 @Setter
 public class UserCreateDto {
+  @NotNull(message = ErrorMessage.INVALID_SOME_THING_FIELD_IS_REQUIRED)
+  private String email;
 
   @NotNull(message = ErrorMessage.INVALID_SOME_THING_FIELD_IS_REQUIRED)
-  private String username;
-
-  @NotNull(message = ErrorMessage.INVALID_SOME_THING_FIELD_IS_REQUIRED)
-  @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8,}$", message = ErrorMessage.INVALID_FORMAT_PASSWORD)
+ // @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8,}$", message = ErrorMessage.INVALID_FORMAT_PASSWORD)
   private String password;
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
-  private String firstName;
+  private String username;
+
+  @NotNull(message = ErrorMessage.INVALID_SOME_THING_FIELD_IS_REQUIRED)
+  private Integer age;
 
   @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
-  private String lastName;
+  private String address;
+
+  @NotNull(message = ErrorMessage.INVALID_SOME_THING_FIELD_IS_REQUIRED)
+  private GenderEnum gender;
 
 }

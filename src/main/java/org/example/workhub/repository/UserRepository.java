@@ -9,6 +9,7 @@ import org.example.workhub.domain.entity.User;
 import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.security.UserPrincipal;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
   @Query("SELECT u FROM User u WHERE u.id = ?1")
   Optional<User> findById(String id);

@@ -1,7 +1,6 @@
 package org.example.workhub.service.impl;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
     user.setDob(req.getDob());
     user.setGender(req.getGender());
     user.setRole( roleRepository.findByName(RoleConstant.CANDIDATE)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND, new String[]{RoleConstant.CANDIDATE}))
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ROLE, new String[]{RoleConstant.CANDIDATE}))
     );
     return userMapper.toRegisterDto(userRepository.save(user));
   }
@@ -284,7 +283,7 @@ public class AuthServiceImpl implements AuthService {
               newUser.setPassword("SOCIAL_LOGIN"); // không dùng password
               newUser.setRole(roleRepository.findByName(RoleConstant.CANDIDATE)
                       .orElseThrow(() -> new NotFoundException(
-                              ErrorMessage.Role.ERR_NOT_FOUND,
+                              ErrorMessage.Role.ERR_NOT_FOUND_ROLE,
                               new String[]{RoleConstant.CANDIDATE}
                       )));
 

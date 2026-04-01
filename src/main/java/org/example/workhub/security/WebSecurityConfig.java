@@ -33,9 +33,10 @@ public class WebSecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/v1/auth/**", "/auth/**","api/v1/forgot-password/**").permitAll()
-                    .anyRequest().authenticated()
+//                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+//                    .requestMatchers("/api/v1/auth/**", "/auth/**","api/v1/forgot-password/**").permitAll()
+//                    .requestMatchers("api/v1/user/**").permitAll()
+                    .anyRequest().permitAll()
             )
 //            .oauth2Login(oauth -> oauth
 //                    .successHandler(successHandler)
