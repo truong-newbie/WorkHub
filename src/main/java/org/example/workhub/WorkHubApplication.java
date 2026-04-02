@@ -17,6 +17,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,8 +48,9 @@ public class WorkHubApplication {
         log.info("   Url swagger-ui      : http://localhost:" + port + "/swagger-ui.html");
         log.info("-------------------------START SUCCESS " + appName
                 + " Application------------------------------");
-    }
 
+
+    }
 //    @Bean
 //    CommandLineRunner init(AdminInfoProperties userInfo) {
 //        return args -> {
@@ -64,4 +70,6 @@ public class WorkHubApplication {
 //            }
 //        };
 //    }
+
+
 }

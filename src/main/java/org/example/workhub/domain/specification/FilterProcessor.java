@@ -11,26 +11,29 @@ public record FilterProcessor(SpecificationBuilder<?> specificationBuilder, List
             return new FilterProcessor(builder, filter);
 //            Nếu người dùng không truyền bộ lọc nào (null hoặc rỗng),
 //            hệ thống sẽ trả về một kết quả "trống" nhưng vẫn hợp lệ.
-        }
-        Pattern pattern = Pattern.compile("^('?)([a-zA-Z0-9_.]+)([<:>~!])(.*)$");
-        for(String condition : filter){
-            Matcher matcher = pattern.matcher(condition);
-            if(matcher.find()){
-                String orIndicator = matcher.group(1);
-                String key = matcher.group(2);
-                String operation = matcher.group(3);
-                String valueStr = matcher.group(4);
-                String prefix = null;
-                String suffix = null;
-                FilterAttributeSearch att = FilterAttributeSearch.handleWildCardSearch(valueStr, orIndicator);
-                if(att.isOrPredicate()){
-                    specificationBuilder.with(SearchOperation.OR_PREDICATE_FLAG,key, operation, valueStr, prefix, suffix);
-                } else{
-                    specificationBuilder.with(key, operation, valueStr, prefix, suffix);
+        }else {
+            Pattern pattern = Pattern.compile("^('?)\\s*([a-zA-Z0-9_.]+)([<:>~!])(.*)$");
+            for(String condition : filter){
+                condition = condition.trim();
+                Matcher matcher = pattern.matcher(condition);
+                if(matcher.find()){
+                    String orIndicator = matcher.group(1);
+                    String key = matcher.group(2).trim();
+                    String operation = matcher.group(3);
+                    String valueStr = matcher.group(4).trim();
+                    String prefix = null;
+                    String suffix = null;
+                    FilterAttributeSearch att = FilterAttributeSearch.handleWildCardSearch(valueStr, orIndicator);
+                    if(att.isOrPredicate()){
+                        specificationBuilder.with(SearchOperation.OR_PREDICATE_FLAG,key, operation, valueStr, prefix, suffix);
+                    } else{
+                        specificationBuilder.with(key, operation, valueStr, prefix, suffix);
+                    }
                 }
             }
-            }
-        return new FilterProcessor(specificationBuilder, filter);
+            return new FilterProcessor(specificationBuilder, filter);
+        }
+
         }
 
 

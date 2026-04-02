@@ -45,7 +45,7 @@ public class User extends DateAuditing implements Serializable {
     @Column(name = "gender")
     private GenderEnum gender;
 
-    @Column(name =" dob" )
+    @Column(name ="dob" )
     private LocalDate dob;
 
     @Column(name = "address")
