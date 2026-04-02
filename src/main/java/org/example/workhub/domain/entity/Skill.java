@@ -22,6 +22,9 @@ public class Skill extends UserDateAuditing {
     @NotBlank(message = "Ten skill khong duoc de trong!")
     private String name;
 
+    @Column(name = "deleted")
+    private Boolean deleted = false;
+
     @ManyToMany(mappedBy = "skills", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Job> jobs;

@@ -38,4 +38,10 @@ public class UrlConstant {
     public static final String ME = COMPANY_BASE+"/me";
   }
 
+  public static class Skill{
+    public static final String SKILL_BASE="/skill";
+    public static final String ID= SKILL_BASE +"/{id}";
+    public static final String ME=SKILL_BASE+"/me";
+  }
+
 }

@@ -46,4 +46,9 @@ public class ErrorMessage {
     public static final String ERR_ALREADY_EXISTS_COMPANY = "exception.company.already.exists.company";
   }
 
+  public static class Skill{
+    public static final String ERR_NOT_FOUND = "exception.skill.not.found";
+    public static final String ERR_ALREADY_EXISTS_SKILL= "exception.skill.already.exists.skill";
+  }
+
 }
