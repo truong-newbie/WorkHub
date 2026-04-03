@@ -12,6 +12,7 @@ public class ErrorMessage {
   public static final String INVALID_FORMAT_SOME_THING_FIELD = "invalid.general.format";
   public static final String INVALID_SOME_THING_FIELD_IS_REQUIRED = "invalid.general.required";
   public static final String NOT_BLANK_FIELD = "invalid.general.not-blank";
+  public static final String NOT_NULL_FIELD = "invalid.general.not-null";
   public static final String INVALID_FORMAT_PASSWORD = "invalid.password-format";
   public static final String INVALID_DATE = "invalid.date-format";
   public static final String INVALID_DATE_FEATURE = "invalid.date-future";
@@ -44,4 +45,16 @@ public class ErrorMessage {
     public static final String ERR_NOT_FOUND_ROLE = "exception.role.not.found";
   }
 
+  public static class Company{
+    public static final String ERR_NOT_FOUND_COMPANY = "exception.company.not.found";
+  }
+
+  public static class Skill{
+    public static final String ERR_NOT_FOUND_SKILL = "exception.skill.not.found";
+  }
+  public static class Job{
+    public static final String ERR_NOT_FOUND_SKILL = "exception.job.not.found";
+
+    public static final String ERR_EXISTED_JOB = "exception.job.already.exists.";
+  }
 }

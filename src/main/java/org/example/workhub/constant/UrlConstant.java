@@ -36,4 +36,18 @@ public class UrlConstant {
     }
   }
 
+  public static class Job {
+    private static final String PRE_FIX = "/job";
+
+    public static final String GET_JOBS = PRE_FIX;
+    public static final String GET_JOB = PRE_FIX + "/{id}";
+    public static final String CREATE_JOB = PRE_FIX;
+    public static final String UPDATE_JOB = PRE_FIX;
+    public static final String DELETE_JOB = PRE_FIX + "/{id}";
+
+
+    private Job() {
+    }
+  }
+
 }

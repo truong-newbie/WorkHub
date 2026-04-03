@@ -3,12 +3,14 @@ package org.example.workhub.domain.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.example.workhub.constant.LevelEnum;
 import org.example.workhub.domain.entity.common.FlagUserDateAuditing;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -25,9 +27,9 @@ public class Job extends FlagUserDateAuditing {
 
     private String location;
 
-    private double salary;
+    private Double salary;
 
-    private int quantity;
+    private Integer quantity;
 
     @Enumerated(EnumType.STRING)
     private LevelEnum level;
@@ -36,10 +38,13 @@ public class Job extends FlagUserDateAuditing {
     private String description;
 
     @Column(name = "start_date")
-    private Instant startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date")
-    private Instant endDate;
+    private LocalDateTime endDate;
+
+    @Column(name = "active")
+    private Boolean active;
 
 
     @ManyToOne

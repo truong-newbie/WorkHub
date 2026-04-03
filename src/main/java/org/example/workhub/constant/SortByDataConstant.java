@@ -35,6 +35,33 @@ USER {
         return "createdDate";
     }
   }
+
+},
+  JOB {
+    @Override
+    public String getSortBy(String sortBy) {
+      switch (sortBy) {
+        case "name":
+          return "name";
+        case "location":
+          return "location";
+        case "salary":
+          return "salary";
+        case "quantity":
+          return "quantity";
+        case "level":
+          return "level";
+        case "startDate":
+          return "startDate";
+        case "endDate":
+          return "endDate";
+        case "lastModifiedDate":
+          return "lastModifiedDate";
+        default:
+          return "createdDate";
+      }
+
+    }
 },
 
 }
