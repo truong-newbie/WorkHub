@@ -1,5 +1,6 @@
 package org.example.workhub.service.impl;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,9 +22,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE , makeFinal = true)
@@ -34,7 +37,7 @@ public class SkillServiceImpl  implements SkillService {
     SkillMapper skillMapper;
 
     @Override
-    public SkillResponseDto create(SkillRequestDto request) {
+    public SkillResponseDto create( SkillRequestDto request) {
         if(skillRepository.existsByNameAndDeletedFalse(request.getName().trim())){
             throw new ConflictException(ErrorMessage.Skill.ERR_ALREADY_EXISTS_SKILL);
         }
@@ -66,12 +69,16 @@ public class SkillServiceImpl  implements SkillService {
 
     @Override
     public PaginationResponseDto<SkillResponseDto> getAll(PaginationFullRequestDto request) {
+        String sortBy = Optional.ofNullable(request.getSortBy())
+                .filter(s -> !s.trim().isEmpty())
+                .orElse("id");
+
         Pageable pageable = (Pageable) PageRequest.of(
                 request.getPageNum(),
                 request.getPageSize(),
                 request.getIsAscending()
-                        ? Sort.by(request.getSortBy()).ascending()
-                        : Sort.by(request.getSortBy()).descending()
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending()
         );
 
         Page<Skill> page = skillRepository.findAll(

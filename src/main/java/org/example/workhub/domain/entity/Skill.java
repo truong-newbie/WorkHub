@@ -6,11 +6,15 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.workhub.domain.entity.common.UserDateAuditing;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
 @Entity
 @Table(name = "tbl_skills")
+@SQLDelete(sql = "UPDATE tbl_skills SET deleted = true WHERE id = ?")
+@Where(clause = "deleted = false")
 @Getter
 @Setter
 public class Skill extends UserDateAuditing {

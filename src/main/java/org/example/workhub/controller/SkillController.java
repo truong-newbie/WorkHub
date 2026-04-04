@@ -1,5 +1,6 @@
 package org.example.workhub.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,12 +24,12 @@ public class SkillController {
     SkillService skillService;
 
     @PostMapping(UrlConstant.Skill.SKILL_BASE)
-    public ResponseEntity<?>  create(SkillRequestDto req){
+    public ResponseEntity<?>  create(@RequestBody @Valid  SkillRequestDto req){
         return VsResponseUtil.success(skillService.create(req));
     }
 
     @PutMapping(UrlConstant.Skill.ID)
-    public ResponseEntity<?> update (@PathVariable long id, SkillRequestDto req){
+    public ResponseEntity<?> update (@PathVariable long id, @RequestBody SkillRequestDto req){
         return VsResponseUtil.success(skillService.update(id, req));
     }
 
@@ -43,7 +44,7 @@ public class SkillController {
     }
 
     @DeleteMapping(UrlConstant.Skill.ID)
-    public ResponseEntity<?> delete(long id){
+    public ResponseEntity<?> delete( @PathVariable Long id){
         skillService.delete(id);
         return VsResponseUtil.success("Skill Deleted Successfully");
     }

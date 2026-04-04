@@ -14,6 +14,6 @@ public class SkillSpecification {
         };
     }
     public static Specification<Skill> isNotDeleted() {
-        return (root, query, cb) -> cb.equal(root.get("isDeleted"), false);
+        return (root, query, cb) -> cb.equal(root.get("deleted"), false);
     }
 }
