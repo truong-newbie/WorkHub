@@ -46,6 +46,7 @@ public class SkillController {
             @RequestParam(defaultValue = "true") boolean isAscending,
             @RequestParam(required = false) String keyword
     ) {
+        keyword = (keyword == null) ? "" : keyword.trim();
         log.info("DEBUG - Controller getAll: keyword={}", keyword);
         PaginationFullRequestDto req = new PaginationFullRequestDto(pageNum, pageSize, sortBy, isAscending, keyword);
         return VsResponseUtil.success(skillService.getAll(req));

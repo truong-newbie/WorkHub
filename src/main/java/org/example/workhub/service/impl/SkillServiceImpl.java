@@ -73,6 +73,7 @@ public class SkillServiceImpl  implements SkillService {
     @Override
     public PaginationResponseDto<SkillResponseDto> getAll(PaginationFullRequestDto request) {
         log.info("DEBUG - SkillServiceImpl#getAll: keyword={}", request.getKeyword());
+
         String sortBy = Optional.ofNullable(request.getSortBy())
                 .filter(s -> !s.trim().isEmpty())
                 .orElse("id");

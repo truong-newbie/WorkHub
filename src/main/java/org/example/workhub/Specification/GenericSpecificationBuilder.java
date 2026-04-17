@@ -42,20 +42,18 @@ public class GenericSpecificationBuilder<T> {
         return this;
     }
 
-    public Specification<T> build() {
-        if (params.isEmpty()) {
-            return null;
-        }
+    public Specification<T> build() {                                                                                                                                           if (params.isEmpty()) {                                                                                                                                                     return null;                                                                                                                                                        }
 
         Specification<T> result = new GenericSpecification<>(params.get(0));
-
         for (int i = 1; i < params.size(); i++) {
             Specification<T> spec = new GenericSpecification<>(params.get(i));
-            result = params.get(i).isOrPredicate()
-                    ? Specification.where(result).or(spec)
-                    : Specification.where(result).and(spec);
+            //  Nếu current hoặc trước đó là OR, nối OR. Còn lại mặc định là AND.
+            if (params.get(i).isOrPredicate() || params.get(i - 1).isOrPredicate()) {
+                result = Specification.where(result).or(spec);
+            } else {
+                result = Specification.where(result).and(spec);
+            }
         }
-
         return result;
     }
 }
