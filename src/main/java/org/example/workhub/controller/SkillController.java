@@ -39,7 +39,15 @@ public class SkillController {
     }
 
     @GetMapping(UrlConstant.Skill.SKILL_BASE)
-    public ResponseEntity<?> getAll(PaginationFullRequestDto req){
+    public ResponseEntity<?> getAll(
+            @RequestParam(defaultValue = "0") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean isAscending,
+            @RequestParam(required = false) String keyword
+    ) {
+        log.info("DEBUG - Controller getAll: keyword={}", keyword);
+        PaginationFullRequestDto req = new PaginationFullRequestDto(pageNum, pageSize, sortBy, isAscending, keyword);
         return VsResponseUtil.success(skillService.getAll(req));
     }
 

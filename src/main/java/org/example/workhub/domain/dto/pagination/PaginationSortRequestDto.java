@@ -21,6 +21,12 @@ public class PaginationSortRequestDto extends PaginationRequestDto {
   @Parameter(description = "Sorting criteria - Default sort order is descending")
   private Boolean isAscending = Boolean.FALSE;
 
+  public PaginationSortRequestDto(Integer pageNum, Integer pageSize, String sortBy, boolean isAscending) {
+    super(pageNum, pageSize);
+    this.sortBy = sortBy;
+    this.isAscending = isAscending;
+  }
+
   public String getSortBy(SortByDataConstant constant) {
     return constant.getSortBy(sortBy);
   }
