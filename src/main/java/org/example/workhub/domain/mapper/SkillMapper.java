@@ -11,6 +11,7 @@ public interface SkillMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", expression = "java(dto.getName().trim())")
+    @Mapping(target ="level", source = "level")
     Skill toEntity(SkillRequestDto dto);
 
     SkillResponseDto toDto(Skill skill);

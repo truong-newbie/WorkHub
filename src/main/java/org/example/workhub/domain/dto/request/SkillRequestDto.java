@@ -13,4 +13,6 @@ public class SkillRequestDto {
     @NotBlank(message = ErrorMessage.NOT_BLANK_FIELD)
     @NotNull(message = "khong duoc de null")
     private String name;
+
+    private String level;
 }

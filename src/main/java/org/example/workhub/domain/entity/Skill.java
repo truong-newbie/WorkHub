@@ -26,6 +26,8 @@ public class Skill extends UserDateAuditing {
     @NotBlank(message = "Ten skill khong duoc de trong!")
     private String name;
 
+    private String level;
+
     @Column(name = "deleted")
     private Boolean deleted = false;
 
