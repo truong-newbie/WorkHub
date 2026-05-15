@@ -86,7 +86,10 @@ public class AuthServiceImpl implements AuthService {
     user.setPassword(passwordEncoder.encode(req.getPassword()));
     user.setDob(req.getDob());
     user.setGender(req.getGender());
-    user.setRole( roleRepository.findByName(RoleConstant.CANDIDATE)
+//    user.setRole( roleRepository.findByName(RoleConstant.CANDIDATE)
+//            .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND, new String[]{RoleConstant.CANDIDATE}))
+//    );
+    user.setRole( roleRepository.findByName(RoleConstant.ADMIN)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND, new String[]{RoleConstant.CANDIDATE}))
     );
     return userMapper.toRegisterDto(userRepository.save(user));

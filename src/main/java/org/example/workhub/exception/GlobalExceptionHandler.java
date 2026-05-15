@@ -52,8 +52,17 @@ public class GlobalExceptionHandler {
     Map<String, String> result = new HashMap<>();
     ex.getBindingResult().getAllErrors().forEach((error) -> {
       String fieldName = ((FieldError) error).getField();
-      String errorMessage = messageSource.getMessage(Objects.requireNonNull(error.getDefaultMessage()), null,
-          LocaleContextHolder.getLocale());
+      String errorMessage;
+      String defaultMessage = error.getDefaultMessage();
+
+      // Check if message is a message key (starts with { and ends with })
+      if (defaultMessage != null && defaultMessage.startsWith("{") && defaultMessage.endsWith("}")) {
+        // Resolve message key from message source
+        errorMessage = messageSource.getMessage(defaultMessage, null, LocaleContextHolder.getLocale());
+      } else {
+        errorMessage = defaultMessage;
+      }
+
       result.put(fieldName, errorMessage);
     });
     return VsResponseUtil.error(HttpStatus.BAD_REQUEST, result);
