@@ -72,4 +72,37 @@ public class User extends DateAuditing implements Serializable {
     @OneToOne(mappedBy = "user")
     private ForgotPassword forgotPassword;
 
+    // === Additional fields for recruitment system ===
+    @Column(name = "enabled")
+    private Boolean enabled = true;
+
+    @Column(name = "deleted")
+    private Boolean deleted = false;
+
+    @Column(name = "avatar", columnDefinition = "TEXT")
+    private String avatar;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "headline")
+    private String headline;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "experience_years")
+    private Integer experienceYears;
+
+    @Column(name = "website")
+    private String website;
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "github_url")
+    private String githubUrl;
+
+    @Column(name = "location")
+    private String location;
 }
