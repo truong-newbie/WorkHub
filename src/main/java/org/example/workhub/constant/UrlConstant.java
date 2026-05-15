@@ -52,4 +52,42 @@ public class UrlConstant {
     public static final String ME=SKILL_BASE+"/me";
   }
 
+  public static class Job{
+    private static final String PRE_FIX = "/job";
+
+    public static final String JOB_BASE = PRE_FIX;
+    public static final String ID = PRE_FIX + "/{id}";
+    public static final String PUBLISH = PRE_FIX + "/{id}/publish";
+    public static final String UNPUBLISH = PRE_FIX + "/{id}/unpublish";
+    public static final String STATISTICS = PRE_FIX + "/statistics";
+    public static final String MY_JOBS = PRE_FIX + "/me";
+
+    private Job() {
+    }
+  }
+
+  public static class JobApplication{
+    private static final String PRE_FIX = "/job";
+
+    public static final String APPLY = PRE_FIX + "/{jobId}/apply";
+    public static final String WITHDRAW = PRE_FIX + "/{jobId}/apply";
+    public static final String JOB_APPLICATIONS = PRE_FIX + "/{jobId}/applications";
+    public static final String MY_APPLICATIONS = "/applications/me";
+    public static final String UPDATE_STATUS = "/applications/{applicationId}/status";
+
+    private JobApplication() {
+    }
+  }
+
+  public static class FavoriteJob{
+    private static final String PRE_FIX = "/job";
+
+    public static final String SAVE = PRE_FIX + "/{jobId}/favorite";
+    public static final String REMOVE = PRE_FIX + "/{jobId}/favorite";
+    public static final String MY_FAVORITES = "/jobs/favorites";
+
+    private FavoriteJob() {
+    }
+  }
+
 }

@@ -52,4 +52,23 @@ public class ErrorMessage {
     public static final String ERR_ALREADY_EXISTS_SKILL= "exception.skill.already.exists.skill";
   }
 
+  public static class Job{
+    public static final String ERR_NOT_FOUND_ID = "exception.job.not.found";
+    public static final String ERR_ALREADY_EXISTS_SLUG = "exception.job.already.exists.slug";
+    public static final String ERR_PERMISSION_DENIED = "exception.job.permission.denied";
+    public static final String ERR_EXPIRED_INVALID = "exception.job.expired.invalid";
+    public static final String ERR_SALARY_INVALID = "exception.job.salary.invalid";
+  }
+
+  public static class Application{
+    public static final String ERR_NOT_FOUND_ID = "exception.application.not.found";
+    public static final String ERR_ALREADY_APPLIED = "exception.application.already.applied";
+    public static final String ERR_CANNOT_WITHDRAW = "exception.application.cannot.withdraw";
+  }
+
+  public static class Favorite{
+    public static final String ERR_ALREADY_FAVORITE = "exception.favorite.already.exists";
+    public static final String ERR_NOT_FAVORITE = "exception.favorite.not.found";
+  }
+
 }

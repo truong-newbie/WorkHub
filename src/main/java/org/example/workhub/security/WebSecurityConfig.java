@@ -13,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -37,6 +39,20 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/v1/auth/**", "/auth/**","api/v1/forgot-password/**").permitAll()
                     .requestMatchers("/api/v1/user/me/**").authenticated()
                     .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
+                    // Job endpoints - Public view, authenticated search
+                    .requestMatchers(HttpMethod.GET, "/api/v1/job/**").authenticated()
+                    // Job write operations - Recruiter/Admin only
+                    .requestMatchers(HttpMethod.POST, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Job Application endpoints
+                    .requestMatchers(HttpMethod.POST, "/api/v1/job/*/apply").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/job/*/apply").authenticated()
+                    .requestMatchers("/api/v1/job/*/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Favorite Job endpoints - All authenticated users
+                    .requestMatchers("/api/v1/job/*/favorite/**").authenticated()
+                    .requestMatchers("/api/v1/jobs/favorites").authenticated()
                     .anyRequest().authenticated()
             )
 //            .oauth2Login(oauth -> oauth
