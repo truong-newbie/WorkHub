@@ -37,6 +37,12 @@ public class Subscriber extends UserDateAuditing {
     @Column(name = "last_email_sent_at")
     private LocalDateTime lastEmailSentAt;
 
+    @Column(name = "unsubscribe_token", unique = true)
+    private String unsubscribeToken;
+
+    @Column(name = "unsubscribed_at")
+    private LocalDateTime unsubscribedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonIgnore

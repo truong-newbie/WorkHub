@@ -152,4 +152,14 @@ public class SubscriberController {
     public ResponseEntity<?> processEmailQueue() {
         return VsResponseUtil.success(emailQueueService.processPendingEmails());
     }
+
+    @Operation(summary = "Unsubscribe by token", description = "Public endpoint used by email unsubscribe links")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscriber unsubscribed successfully"),
+            @ApiResponse(responseCode = "404", description = "Invalid unsubscribe token")
+    })
+    @GetMapping(UrlConstant.Subscriber.UNSUBSCRIBE)
+    public ResponseEntity<?> unsubscribeByToken(@RequestParam String token) {
+        return VsResponseUtil.success(subscriberService.unsubscribeByToken(token));
+    }
 }

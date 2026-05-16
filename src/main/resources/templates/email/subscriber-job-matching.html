@@ -72,6 +72,10 @@
                         <p style="margin:8px 0 0; font-size:13px; line-height:21px; color:#6b7280;" th:text="${footer}">
                             You can update or disable your subscription in WorkHub.
                         </p>
+                        <p style="margin:14px 0 0; font-size:12px; line-height:20px; color:#64748b;">
+                            If you no longer want to receive these emails,
+                            <a th:href="${unsubscribeUrl}" href="http://localhost:8080/api/v1/subscribers/unsubscribe?token=sample" style="color:#2563eb; text-decoration:underline;">unsubscribe here</a>.
+                        </p>
                     </td>
                 </tr>
                 <tr>

@@ -6,6 +6,7 @@ import org.example.workhub.domain.dto.request.SubscriberSearchRequest;
 import org.example.workhub.domain.dto.request.SubscriberUpdateRequest;
 import org.example.workhub.domain.dto.response.SubscriberMailResponse;
 import org.example.workhub.domain.dto.response.SubscriberResponse;
+import org.example.workhub.domain.dto.response.SubscriberUnsubscribeResponse;
 
 public interface SubscriberService {
 
@@ -26,4 +27,6 @@ public interface SubscriberService {
     PaginationResponseDto<SubscriberResponse> getSubscribers(SubscriberSearchRequest request);
 
     SubscriberMailResponse sendMatchingJobEmails();
+
+    SubscriberUnsubscribeResponse unsubscribeByToken(String token);
 }

@@ -37,6 +37,9 @@ public class SubscriberResponse {
     @Schema(description = "Last email sent at")
     private LocalDateTime lastEmailSentAt;
 
+    @Schema(description = "Unsubscribed at")
+    private LocalDateTime unsubscribedAt;
+
     @Schema(description = "Owner info")
     private UserInfo user;
 

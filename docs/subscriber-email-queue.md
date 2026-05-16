@@ -100,6 +100,7 @@ The email template receives these variables:
 - `header`
 - `footer`
 - `generatedAt`
+- `unsubscribeUrl`
 - `jobs`
 
 Each job item contains:
@@ -125,6 +126,45 @@ For example, job `id=1` becomes:
 ```text
 http://localhost:3000/jobs/1
 ```
+
+## Unsubscribe Token
+
+Each subscriber has a durable `unsubscribeToken`. The HTML email includes a public unsubscribe link:
+
+```http
+GET http://localhost:8080/api/v1/subscribers/unsubscribe?token=<unsubscribe_token>
+```
+
+No bearer token is required for this endpoint because it is designed to be opened directly from an email.
+
+The backend URL uses:
+
+```properties
+app.backend-url=http://localhost:8080/api/v1
+```
+
+Expected response:
+
+```json
+{
+  "status": "SUCCESS",
+  "data": {
+    "email": "candidate@gmail.com",
+    "enabled": false,
+    "unsubscribedAt": "2026-05-16T21:30:00",
+    "message": "Unsubscribed successfully"
+  }
+}
+```
+
+When the link is opened, the subscriber is not deleted. The system only sets:
+
+```text
+enabled = false
+unsubscribedAt = now
+```
+
+If the user enables subscriber again from the authenticated API, `unsubscribedAt` is cleared.
 
 ## Retry Rule
 

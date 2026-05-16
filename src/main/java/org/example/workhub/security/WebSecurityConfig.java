@@ -56,6 +56,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/v1/resume/**").authenticated()
                     .requestMatchers("/api/v1/job/*/candidates/*/resume/**").hasAnyRole("RECRUITER", "ADMIN")
                     // Subscriber endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/subscribers/unsubscribe").permitAll()
                     .requestMatchers("/api/v1/subscribers/**").authenticated()
                     .anyRequest().authenticated()
             )

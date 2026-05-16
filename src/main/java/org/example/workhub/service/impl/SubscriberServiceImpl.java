@@ -11,6 +11,7 @@ import org.example.workhub.domain.dto.request.SubscriberSearchRequest;
 import org.example.workhub.domain.dto.request.SubscriberUpdateRequest;
 import org.example.workhub.domain.dto.response.SubscriberMailResponse;
 import org.example.workhub.domain.dto.response.SubscriberResponse;
+import org.example.workhub.domain.dto.response.SubscriberUnsubscribeResponse;
 import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.Skill;
 import org.example.workhub.domain.entity.Subscriber;
@@ -48,6 +49,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -70,6 +72,9 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
+    @Value("${app.backend-url:http://localhost:8080/api/v1}")
+    private String backendUrl;
+
     @Override
     public SubscriberResponse createSubscriber(SubscriberCreateRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
@@ -88,6 +93,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriber.setEnabled(request.getEnabled() == null || Boolean.TRUE.equals(request.getEnabled()));
         subscriber.setDeleted(false);
         subscriber.setSubscribedAt(LocalDateTime.now());
+        subscriber.setUnsubscribeToken(generateUnsubscribeToken());
         subscriber.setUser(user);
         subscriber.setSkills(resolveSkills(request.getSkillIds()));
 
@@ -109,6 +115,9 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
         if (request.getEnabled() != null) {
             subscriber.setEnabled(request.getEnabled());
+            if (Boolean.TRUE.equals(request.getEnabled())) {
+                subscriber.setUnsubscribedAt(null);
+            }
         }
         if (request.getSkillIds() != null) {
             validateSkillIds(request.getSkillIds());
@@ -153,6 +162,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         Subscriber subscriber = findSubscriber(id);
         validateManagePermission(subscriber, currentUser);
         subscriber.setEnabled(true);
+        subscriber.setUnsubscribedAt(null);
         return subscriberMapper.toResponse(subscriberRepository.save(subscriber));
     }
 
@@ -208,6 +218,7 @@ public class SubscriberServiceImpl implements SubscriberService {
             if (jobs.isEmpty()) {
                 continue;
             }
+            ensureUnsubscribeToken(subscriber);
 
             boolean queued = emailQueueService.enqueueSubscriberMatchingEmail(
                     subscriber,
@@ -230,6 +241,28 @@ public class SubscriberServiceImpl implements SubscriberService {
                 .build();
     }
 
+    @Override
+    public SubscriberUnsubscribeResponse unsubscribeByToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new NotFoundException(ErrorMessage.Subscriber.ERR_INVALID_UNSUBSCRIBE_TOKEN);
+        }
+
+        Subscriber subscriber = subscriberRepository.findByUnsubscribeTokenAndDeletedFalse(token.trim())
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.Subscriber.ERR_INVALID_UNSUBSCRIBE_TOKEN));
+
+        LocalDateTime unsubscribedAt = LocalDateTime.now();
+        subscriber.setEnabled(false);
+        subscriber.setUnsubscribedAt(unsubscribedAt);
+        subscriberRepository.save(subscriber);
+
+        return SubscriberUnsubscribeResponse.builder()
+                .email(subscriber.getEmail())
+                .enabled(false)
+                .unsubscribedAt(unsubscribedAt)
+                .message(getMessage("subscriber.unsubscribe.success"))
+                .build();
+    }
+
     private String buildMatchingJobEmail(Subscriber subscriber, List<Job> jobs) {
         String subscriberName = subscriber.getName() != null && !subscriber.getName().isBlank()
                 ? subscriber.getName()
@@ -240,6 +273,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         context.setVariable("footer", getMessage("subscriber.mail.body.footer"));
         context.setVariable("jobs", jobs.stream().map(this::toEmailJobItem).collect(Collectors.toList()));
         context.setVariable("generatedAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        context.setVariable("unsubscribeUrl", buildUnsubscribeUrl(subscriber));
         return templateEngine.process("email/subscriber-job-matching", context);
     }
 
@@ -272,6 +306,22 @@ public class SubscriberServiceImpl implements SubscriberService {
             return job.getSalaryMin() + " - " + job.getSalaryMax();
         }
         return job.getSalaryMin() != null ? "From " + job.getSalaryMin() : "Up to " + job.getSalaryMax();
+    }
+
+    private void ensureUnsubscribeToken(Subscriber subscriber) {
+        if (subscriber.getUnsubscribeToken() != null && !subscriber.getUnsubscribeToken().isBlank()) {
+            return;
+        }
+        subscriber.setUnsubscribeToken(generateUnsubscribeToken());
+        subscriberRepository.save(subscriber);
+    }
+
+    private String generateUnsubscribeToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String buildUnsubscribeUrl(Subscriber subscriber) {
+        return backendUrl + "/subscribers/unsubscribe?token=" + subscriber.getUnsubscribeToken();
     }
 
     @lombok.Getter

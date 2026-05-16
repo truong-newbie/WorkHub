@@ -32,6 +32,10 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Long>, J
     boolean existsByEmailIgnoreCaseAndDeletedFalseAndIdNot(@Param("email") String email, @Param("id") Long id);
 
     @EntityGraph(attributePaths = {"user", "skills"})
+    @Query("SELECT s FROM Subscriber s WHERE s.unsubscribeToken = :token AND s.deleted = false")
+    Optional<Subscriber> findByUnsubscribeTokenAndDeletedFalse(@Param("token") String token);
+
+    @EntityGraph(attributePaths = {"user", "skills"})
     @Query("SELECT DISTINCT s FROM Subscriber s LEFT JOIN s.skills sk WHERE s.enabled = true AND s.deleted = false")
     List<Subscriber> findAllEnabledWithSkills();
 }

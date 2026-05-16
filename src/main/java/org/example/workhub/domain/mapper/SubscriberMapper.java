@@ -25,6 +25,7 @@ public interface SubscriberMapper {
                 .deleted(subscriber.getDeleted())
                 .subscribedAt(subscriber.getSubscribedAt())
                 .lastEmailSentAt(subscriber.getLastEmailSentAt())
+                .unsubscribedAt(subscriber.getUnsubscribedAt())
                 .user(mapUser(subscriber.getUser()))
                 .skills(mapSkills(subscriber.getSkills()))
                 .createdDate(subscriber.getCreatedDate())
