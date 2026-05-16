@@ -1,12 +1,13 @@
 package org.example.workhub.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.workhub.domain.entity.common.UserDateAuditing;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,11 +20,33 @@ public class Subscriber extends UserDateAuditing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "name khong duoc de trong")
     private String name;
 
-    @NotBlank(message = "email khong duoc de trong")
+    @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false)
+    private Boolean enabled = true;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    @Column(name = "subscribed_at", nullable = false)
+    private LocalDateTime subscribedAt;
+
+    @Column(name = "last_email_sent_at")
+    private LocalDateTime lastEmailSentAt;
+
+    @Column(name = "unsubscribe_token", unique = true)
+    private String unsubscribeToken;
+
+    @Column(name = "unsubscribed_at")
+    private LocalDateTime unsubscribedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnoreProperties("subscribers")
@@ -33,6 +56,4 @@ public class Subscriber extends UserDateAuditing {
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private List<Skill> skills;
-
-
 }

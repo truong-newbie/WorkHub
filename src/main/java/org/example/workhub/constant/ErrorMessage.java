@@ -82,4 +82,13 @@ public class ErrorMessage {
     public static final String ERR_UPLOAD_FAILED = "resume.upload.failed";
   }
 
+  public static class Subscriber{
+    public static final String ERR_NOT_FOUND = "subscriber.not.found";
+    public static final String ERR_PERMISSION_DENIED = "subscriber.permission.denied";
+    public static final String ERR_EMAIL_EXISTS = "subscriber.email.exists";
+    public static final String ERR_INVALID_EMAIL = "subscriber.invalid.email";
+    public static final String ERR_SKILL_EMPTY = "subscriber.skill.empty";
+    public static final String ERR_INVALID_UNSUBSCRIBE_TOKEN = "subscriber.unsubscribe.token.invalid";
+  }
+
 }
