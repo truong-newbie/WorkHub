@@ -59,6 +59,13 @@ public class ErrorMessage {
   public static class Skill{
     public static final String ERR_NOT_FOUND = "exception.skill.not.found";
     public static final String ERR_ALREADY_EXISTS_SKILL= "exception.skill.already.exists.skill";
+    public static final String ERR_PERMISSION_DENIED = "skill.permission.denied";
+    public static final String ERR_SLUG_EXISTS = "skill.slug.exists";
+    public static final String ERR_ALREADY_ENABLED = "skill.already.enabled";
+    public static final String ERR_ALREADY_DISABLED = "skill.already.disabled";
+    public static final String ERR_INACTIVE = "skill.inactive";
+    public static final String ERR_DELETED = "skill.deleted";
+    public static final String ERR_IN_USE = "skill.in.use";
   }
 
   public static class Job{

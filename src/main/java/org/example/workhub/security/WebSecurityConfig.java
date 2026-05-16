@@ -49,6 +49,12 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Skill endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/skills/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/skills/**").hasRole("ADMIN")
                     // Job endpoints - Public view, authenticated search
                     .requestMatchers(HttpMethod.GET, "/api/v1/job/**").authenticated()
                     // Job write operations - Recruiter/Admin only

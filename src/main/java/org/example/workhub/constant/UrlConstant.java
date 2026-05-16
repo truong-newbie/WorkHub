@@ -55,9 +55,13 @@ public class UrlConstant {
   }
 
   public static class Skill{
-    public static final String SKILL_BASE="/skill";
+    public static final String SKILL_BASE="/skills";
     public static final String ID= SKILL_BASE +"/{id}";
-    public static final String ME=SKILL_BASE+"/me";
+    public static final String ENABLE=SKILL_BASE+"/{id}/enable";
+    public static final String DISABLE=SKILL_BASE+"/{id}/disable";
+    public static final String SEARCH=SKILL_BASE+"/search";
+    public static final String POPULAR=SKILL_BASE+"/popular";
+    public static final String SUGGESTIONS=SKILL_BASE+"/suggestions";
   }
 
   public static class Job{
