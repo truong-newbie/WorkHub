@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.exception.UploadFileException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +26,7 @@ public class UploadFileUtil {
           resourceType));
       return result.get("secure_url").toString();
     } catch (IOException e) {
-      throw new UploadFileException("Upload file failed!");
+      throw new UploadFileException(ErrorMessage.Resume.ERR_UPLOAD_FAILED);
     }
   }
 
@@ -34,7 +35,7 @@ public class UploadFileUtil {
       Map<?, ?> result = cloudinary.uploader().upload(bytes, ObjectUtils.asMap("resource_type", "image"));
       return result.get("secure_url").toString();
     } catch (IOException e) {
-      throw new UploadFileException("Upload image failed!");
+      throw new UploadFileException(ErrorMessage.Resume.ERR_UPLOAD_FAILED);
     }
   }
 
@@ -46,7 +47,7 @@ public class UploadFileUtil {
       Map<?, ?> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
       log.info(String.format("Destroy image public id %s %s", publicId, result.toString()));
     } catch (IOException e) {
-      throw new UploadFileException("Remove file failed!");
+      throw new UploadFileException(ErrorMessage.Resume.ERR_UPLOAD_FAILED);
     }
   }
 
@@ -61,7 +62,7 @@ public class UploadFileUtil {
         return "auto";
       }
     } else {
-      throw new UploadFileException("Invalid file!");
+      throw new UploadFileException(ErrorMessage.Resume.ERR_FILE_INVALID);
     }
   }
 

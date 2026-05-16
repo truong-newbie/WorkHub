@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -53,6 +52,9 @@ public class WebSecurityConfig {
                     // Favorite Job endpoints - All authenticated users
                     .requestMatchers("/api/v1/job/*/favorite/**").authenticated()
                     .requestMatchers("/api/v1/jobs/favorites").authenticated()
+                    // Resume endpoints
+                    .requestMatchers("/api/v1/resume/**").authenticated()
+                    .requestMatchers("/api/v1/job/*/candidates/*/resume/**").hasAnyRole("RECRUITER", "ADMIN")
                     .anyRequest().authenticated()
             )
 //            .oauth2Login(oauth -> oauth
