@@ -27,6 +27,9 @@ public class EmailQueue extends DateAuditing {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
+    @Column(name = "is_html", nullable = false)
+    private Boolean isHtml = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EmailQueueStatus status = EmailQueueStatus.PENDING;

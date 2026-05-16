@@ -30,6 +30,7 @@ import org.example.workhub.service.EmailQueueService;
 import org.example.workhub.service.SubscriberService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +39,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -61,6 +65,10 @@ public class SubscriberServiceImpl implements SubscriberService {
     private final SubscriberMapper subscriberMapper;
     private final EmailQueueService emailQueueService;
     private final MessageSource messageSource;
+    private final SpringTemplateEngine templateEngine;
+
+    @Value("${app.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Override
     public SubscriberResponse createSubscriber(SubscriberCreateRequest request) {
@@ -205,6 +213,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                     subscriber,
                     getMessage("subscriber.mail.subject"),
                     buildMatchingJobEmail(subscriber, jobs),
+                    true,
                     now
             );
             if (queued) {
@@ -222,12 +231,61 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     private String buildMatchingJobEmail(Subscriber subscriber, List<Job> jobs) {
-        String header = getMessage("subscriber.mail.body.header", subscriber.getName() != null ? subscriber.getName() : subscriber.getEmail());
-        String jobLines = jobs.stream()
-                .map(job -> "- " + job.getTitle() + " | " + job.getLocation())
-                .collect(Collectors.joining(System.lineSeparator()));
-        String footer = getMessage("subscriber.mail.body.footer");
-        return header + System.lineSeparator() + System.lineSeparator() + jobLines + System.lineSeparator() + System.lineSeparator() + footer;
+        String subscriberName = subscriber.getName() != null && !subscriber.getName().isBlank()
+                ? subscriber.getName()
+                : subscriber.getEmail();
+        Context context = new Context(LocaleContextHolder.getLocale());
+        context.setVariable("subscriberName", subscriberName);
+        context.setVariable("header", getMessage("subscriber.mail.body.header", subscriberName));
+        context.setVariable("footer", getMessage("subscriber.mail.body.footer"));
+        context.setVariable("jobs", jobs.stream().map(this::toEmailJobItem).collect(Collectors.toList()));
+        context.setVariable("generatedAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        return templateEngine.process("email/subscriber-job-matching", context);
+    }
+
+    private EmailJobItem toEmailJobItem(Job job) {
+        String companyName = job.getCompany() != null ? job.getCompany().getName() : "WorkHub company";
+        String skills = job.getSkills() == null ? "" : job.getSkills().stream()
+                .map(Skill::getName)
+                .collect(Collectors.joining(", "));
+        return EmailJobItem.builder()
+                .id(job.getId())
+                .title(job.getTitle())
+                .companyName(companyName)
+                .location(job.getLocation())
+                .salary(buildSalary(job))
+                .employmentType(job.getEmploymentType())
+                .level(job.getLevel() != null ? job.getLevel().name() : null)
+                .skills(skills)
+                .url(frontendUrl + "/jobs/" + job.getId())
+                .build();
+    }
+
+    private String buildSalary(Job job) {
+        if (Boolean.TRUE.equals(job.getNegotiableSalary())) {
+            return "Negotiable";
+        }
+        if (job.getSalaryMin() == null && job.getSalaryMax() == null) {
+            return "Not disclosed";
+        }
+        if (job.getSalaryMin() != null && job.getSalaryMax() != null) {
+            return job.getSalaryMin() + " - " + job.getSalaryMax();
+        }
+        return job.getSalaryMin() != null ? "From " + job.getSalaryMin() : "Up to " + job.getSalaryMax();
+    }
+
+    @lombok.Getter
+    @lombok.Builder
+    private static class EmailJobItem {
+        private Long id;
+        private String title;
+        private String companyName;
+        private String location;
+        private String salary;
+        private String employmentType;
+        private String level;
+        private String skills;
+        private String url;
     }
 
     private Subscriber findSubscriber(Long id) {

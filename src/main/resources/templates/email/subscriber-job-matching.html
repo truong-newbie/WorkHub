@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkHub Matching Jobs</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f6f8; padding:24px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:640px; max-width:100%; background:#ffffff; border:1px solid #e5e7eb;">
+                <tr>
+                    <td style="padding:24px 28px; background:#0f172a;">
+                        <div style="font-size:22px; line-height:28px; font-weight:700; color:#ffffff;">WorkHub</div>
+                        <div style="font-size:13px; line-height:20px; color:#cbd5e1; margin-top:4px;">New jobs matching your subscribed skills</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:28px;">
+                        <h1 style="margin:0 0 10px; font-size:22px; line-height:30px; color:#111827;">Recommended jobs for you</h1>
+                        <p style="margin:0 0 20px; font-size:15px; line-height:24px; color:#4b5563;" th:text="${header}">
+                            We found new jobs matching your subscribed skills.
+                        </p>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                            <tr th:each="job : ${jobs}">
+                                <td style="padding:0 0 14px;">
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e5e7eb; border-radius:8px;">
+                                        <tr>
+                                            <td style="padding:18px;">
+                                                <div style="font-size:17px; line-height:24px; font-weight:700; color:#111827;" th:text="${job.title}">Senior Java Backend Developer</div>
+                                                <div style="font-size:14px; line-height:22px; color:#475569; margin-top:4px;" th:text="${job.companyName}">WorkHub Company</div>
+                                                <table role="presentation" cellspacing="0" cellpadding="0" style="margin-top:12px;">
+                                                    <tr>
+                                                        <td style="font-size:13px; line-height:20px; color:#374151; padding:0 14px 6px 0;">
+                                                            <strong>Location:</strong>
+                                                            <span th:text="${job.location}">Ho Chi Minh</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="font-size:13px; line-height:20px; color:#374151; padding:0 14px 6px 0;">
+                                                            <strong>Salary:</strong>
+                                                            <span th:text="${job.salary}">Negotiable</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="font-size:13px; line-height:20px; color:#374151; padding:0 14px 6px 0;">
+                                                            <strong>Level:</strong>
+                                                            <span th:text="${job.level ?: 'Not specified'}">SENIOR</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="font-size:13px; line-height:20px; color:#374151; padding:0 14px 0 0;">
+                                                            <strong>Skills:</strong>
+                                                            <span th:text="${job.skills}">Java, Spring Boot</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div style="margin-top:16px;">
+                                                    <a th:href="${job.url}" href="http://localhost:3000/jobs/1" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; font-size:14px; line-height:20px; font-weight:700; padding:10px 16px; border-radius:6px;">
+                                                        View job
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:8px 0 0; font-size:13px; line-height:21px; color:#6b7280;" th:text="${footer}">
+                            You can update or disable your subscription in WorkHub.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:18px 28px; background:#f8fafc; border-top:1px solid #e5e7eb;">
+                        <div style="font-size:12px; line-height:18px; color:#64748b;">
+                            Sent by WorkHub at <span th:text="${generatedAt}">2026-05-16 21:30</span>.
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

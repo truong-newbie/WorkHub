@@ -32,7 +32,7 @@ public class EmailQueueServiceImpl implements EmailQueueService {
     private final EmailService emailService;
 
     @Override
-    public boolean enqueueSubscriberMatchingEmail(Subscriber subscriber, String subject, String body, LocalDateTime matchedUntilAt) {
+    public boolean enqueueSubscriberMatchingEmail(Subscriber subscriber, String subject, String body, Boolean isHtml, LocalDateTime matchedUntilAt) {
         if (emailQueueRepository.existsBySubscriberIdAndStatusIn(subscriber.getId(), ACTIVE_STATUSES)) {
             return false;
         }
@@ -41,6 +41,7 @@ public class EmailQueueServiceImpl implements EmailQueueService {
         emailQueue.setToEmail(subscriber.getEmail());
         emailQueue.setSubject(subject);
         emailQueue.setBody(body);
+        emailQueue.setIsHtml(Boolean.TRUE.equals(isHtml));
         emailQueue.setStatus(EmailQueueStatus.PENDING);
         emailQueue.setRetryCount(0);
         emailQueue.setMaxRetry(3);
@@ -69,11 +70,16 @@ public class EmailQueueServiceImpl implements EmailQueueService {
             emailQueueRepository.save(queue);
 
             try {
-                emailService.sendSimpleMessage(MailBody.builder()
+                MailBody mailBody = MailBody.builder()
                         .to(queue.getToEmail())
                         .subject(queue.getSubject())
                         .text(queue.getBody())
-                        .build());
+                        .build();
+                if (Boolean.TRUE.equals(queue.getIsHtml())) {
+                    emailService.sendHtmlMessage(mailBody);
+                } else {
+                    emailService.sendSimpleMessage(mailBody);
+                }
 
                 markSent(queue);
                 sentEmails++;

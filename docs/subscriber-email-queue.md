@@ -4,14 +4,21 @@
 
 Subscriber matching no longer sends SMTP mail directly. It now creates email queue records and a background worker sends those emails asynchronously.
 
+Queued subscriber emails are rendered from the Thymeleaf HTML template:
+
+```text
+src/main/resources/templates/email/subscriber-job-matching.html
+```
+
 ## Flow
 
 ```text
 Subscriber matching scheduler or manual API
   -> find subscribers with matching jobs
-  -> create tbl_email_queues rows with status PENDING
+  -> render HTML email template
+  -> create tbl_email_queues rows with status PENDING and isHtml=true
   -> EmailQueueWorker picks pending rows
-  -> EmailService sends real SMTP email
+  -> EmailService sends real SMTP HTML email
   -> queue status becomes SENT or FAILED
 ```
 
@@ -84,6 +91,40 @@ Default: waits 30 seconds after app startup, then every 60 seconds pending email
 - `PROCESSING`: worker is sending it.
 - `SENT`: SMTP send succeeded.
 - `FAILED`: max retry count reached.
+
+## HTML Template
+
+The email template receives these variables:
+
+- `subscriberName`
+- `header`
+- `footer`
+- `generatedAt`
+- `jobs`
+
+Each job item contains:
+
+- `id`
+- `title`
+- `companyName`
+- `location`
+- `salary`
+- `employmentType`
+- `level`
+- `skills`
+- `url`
+
+The job URL uses:
+
+```properties
+app.frontend-url=http://localhost:3000
+```
+
+For example, job `id=1` becomes:
+
+```text
+http://localhost:3000/jobs/1
+```
 
 ## Retry Rule
 
