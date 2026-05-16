@@ -71,4 +71,15 @@ public class ErrorMessage {
     public static final String ERR_NOT_FAVORITE = "exception.favorite.not.found";
   }
 
+  public static class Resume{
+    public static final String ERR_NOT_FOUND = "resume.not.found";
+    public static final String ERR_FILE_INVALID = "resume.file.invalid";
+    public static final String ERR_FILE_TOO_LARGE = "resume.file.too.large";
+    public static final String ERR_PERMISSION_DENIED = "resume.permission.denied";
+    public static final String ERR_UPLOAD_EMPTY = "resume.upload.empty";
+    public static final String ERR_DUPLICATE_TITLE = "resume.title.duplicate";
+    public static final String ERR_ATS_SCORE_INVALID = "resume.ats.score.invalid";
+    public static final String ERR_UPLOAD_FAILED = "resume.upload.failed";
+  }
+
 }

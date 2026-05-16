@@ -90,4 +90,21 @@ public class UrlConstant {
     }
   }
 
+  public static class Resume{
+    private static final String PRE_FIX = "/resume";
+
+    public static final String RESUME_BASE = PRE_FIX;
+    public static final String ID = PRE_FIX + "/{id}";
+    public static final String FILE = PRE_FIX + "/{id}/file";
+    public static final String MY_RESUMES = PRE_FIX + "/me";
+    public static final String ADMIN_RESUMES = PRE_FIX + "/admin";
+    public static final String DEFAULT = PRE_FIX + "/{id}/default";
+    public static final String DOWNLOAD = PRE_FIX + "/{id}/download";
+    public static final String RECRUITER_CANDIDATE_RESUME = "/job/{jobId}/candidates/{candidateId}/resume";
+    public static final String RECRUITER_DOWNLOAD = "/job/{jobId}/candidates/{candidateId}/resume/download";
+
+    private Resume() {
+    }
+  }
+
 }
