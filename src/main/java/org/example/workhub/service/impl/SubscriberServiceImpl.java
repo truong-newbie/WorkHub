@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.constant.RoleConstant;
+import org.example.workhub.constant.SubscriberJobNotificationStatus;
 import org.example.workhub.domain.dto.pagination.PaginationResponseDto;
 import org.example.workhub.domain.dto.pagination.PagingMeta;
 import org.example.workhub.domain.dto.request.SubscriberCreateRequest;
@@ -207,14 +208,18 @@ public class SubscriberServiceImpl implements SubscriberService {
                 continue;
             }
 
-            LocalDateTime since = subscriber.getLastEmailSentAt() != null
-                    ? subscriber.getLastEmailSentAt()
-                    : subscriber.getSubscribedAt();
+            LocalDateTime since = subscriber.getSubscribedAt();
             if (since == null) {
                 since = now.minusDays(1);
             }
 
-            List<Job> jobs = jobRepository.findNewPublishedJobsBySkillIds(skillIds, since, Instant.now());
+            List<Job> jobs = jobRepository.findUnsentPublishedJobsBySkillIds(
+                    subscriber.getId(),
+                    skillIds,
+                    since,
+                    Instant.now(),
+                    List.of(SubscriberJobNotificationStatus.SENT, SubscriberJobNotificationStatus.PENDING)
+            );
             if (jobs.isEmpty()) {
                 continue;
             }
@@ -222,6 +227,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
             boolean queued = emailQueueService.enqueueSubscriberMatchingEmail(
                     subscriber,
+                    jobs,
                     getMessage("subscriber.mail.subject"),
                     buildMatchingJobEmail(subscriber, jobs),
                     true,

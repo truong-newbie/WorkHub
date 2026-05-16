@@ -3,11 +3,15 @@ package org.example.workhub.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.EmailQueueStatus;
+import org.example.workhub.constant.SubscriberJobNotificationStatus;
 import org.example.workhub.domain.dto.common.MailBody;
 import org.example.workhub.domain.dto.response.EmailQueueProcessResponse;
 import org.example.workhub.domain.entity.EmailQueue;
+import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.Subscriber;
+import org.example.workhub.domain.entity.SubscriberJobNotification;
 import org.example.workhub.repository.EmailQueueRepository;
+import org.example.workhub.repository.SubscriberJobNotificationRepository;
 import org.example.workhub.repository.SubscriberRepository;
 import org.example.workhub.service.EmailQueueService;
 import org.example.workhub.service.EmailService;
@@ -28,12 +32,23 @@ public class EmailQueueServiceImpl implements EmailQueueService {
     private static final Set<EmailQueueStatus> ACTIVE_STATUSES = Set.of(EmailQueueStatus.PENDING, EmailQueueStatus.PROCESSING);
 
     private final EmailQueueRepository emailQueueRepository;
+    private final SubscriberJobNotificationRepository subscriberJobNotificationRepository;
     private final SubscriberRepository subscriberRepository;
     private final EmailService emailService;
 
     @Override
-    public boolean enqueueSubscriberMatchingEmail(Subscriber subscriber, String subject, String body, Boolean isHtml, LocalDateTime matchedUntilAt) {
+    public boolean enqueueSubscriberMatchingEmail(
+            Subscriber subscriber,
+            List<Job> jobs,
+            String subject,
+            String body,
+            Boolean isHtml,
+            LocalDateTime matchedUntilAt
+    ) {
         if (emailQueueRepository.existsBySubscriberIdAndStatusIn(subscriber.getId(), ACTIVE_STATUSES)) {
+            return false;
+        }
+        if (jobs == null || jobs.isEmpty()) {
             return false;
         }
 
@@ -49,7 +64,8 @@ public class EmailQueueServiceImpl implements EmailQueueService {
         emailQueue.setMatchedUntilAt(matchedUntilAt);
         emailQueue.setSubscriber(subscriber);
 
-        emailQueueRepository.save(emailQueue);
+        EmailQueue savedQueue = emailQueueRepository.save(emailQueue);
+        createPendingNotifications(subscriber, savedQueue, jobs);
         return true;
     }
 
@@ -105,6 +121,7 @@ public class EmailQueueServiceImpl implements EmailQueueService {
         queue.setStatus(EmailQueueStatus.SENT);
         queue.setSentAt(now);
         queue.setErrorMessage(null);
+        markNotificationsSent(queue, now);
 
         Subscriber subscriber = queue.getSubscriber();
         if (subscriber != null && queue.getMatchedUntilAt() != null) {
@@ -122,6 +139,7 @@ public class EmailQueueServiceImpl implements EmailQueueService {
 
         if (nextRetryCount >= queue.getMaxRetry()) {
             queue.setStatus(EmailQueueStatus.FAILED);
+            markNotificationsFailed(queue, ex.getMessage());
             emailQueueRepository.save(queue);
             return true;
         }
@@ -130,5 +148,47 @@ public class EmailQueueServiceImpl implements EmailQueueService {
         queue.setNextAttemptAt(LocalDateTime.now().plusMinutes(nextRetryCount * 5L));
         emailQueueRepository.save(queue);
         return false;
+    }
+
+    private void createPendingNotifications(Subscriber subscriber, EmailQueue emailQueue, List<Job> jobs) {
+        List<SubscriberJobNotification> notifications = jobs.stream()
+                .filter(job -> !subscriberJobNotificationRepository.existsBySubscriberIdAndJobIdAndStatusIn(
+                        subscriber.getId(),
+                        job.getId(),
+                        List.of(SubscriberJobNotificationStatus.SENT, SubscriberJobNotificationStatus.PENDING)
+                ))
+                .map(job -> {
+                    SubscriberJobNotification notification = new SubscriberJobNotification();
+                    notification.setSubscriber(subscriber);
+                    notification.setJob(job);
+                    notification.setEmailQueue(emailQueue);
+                    notification.setEmail(subscriber.getEmail());
+                    notification.setStatus(SubscriberJobNotificationStatus.PENDING);
+                    return notification;
+                })
+                .toList();
+        subscriberJobNotificationRepository.saveAll(notifications);
+    }
+
+    private void markNotificationsSent(EmailQueue queue, LocalDateTime sentAt) {
+        List<SubscriberJobNotification> notifications = subscriberJobNotificationRepository.findByEmailQueueId(queue.getId());
+        notifications.forEach(notification -> {
+            notification.setStatus(SubscriberJobNotificationStatus.SENT);
+            notification.setSentAt(sentAt);
+            notification.setFailedAt(null);
+            notification.setErrorMessage(null);
+        });
+        subscriberJobNotificationRepository.saveAll(notifications);
+    }
+
+    private void markNotificationsFailed(EmailQueue queue, String errorMessage) {
+        LocalDateTime failedAt = LocalDateTime.now();
+        List<SubscriberJobNotification> notifications = subscriberJobNotificationRepository.findByEmailQueueId(queue.getId());
+        notifications.forEach(notification -> {
+            notification.setStatus(SubscriberJobNotificationStatus.FAILED);
+            notification.setFailedAt(failedAt);
+            notification.setErrorMessage(errorMessage);
+        });
+        subscriberJobNotificationRepository.saveAll(notifications);
     }
 }

@@ -15,11 +15,14 @@ src/main/resources/templates/email/subscriber-job-matching.html
 ```text
 Subscriber matching scheduler or manual API
   -> find subscribers with matching jobs
+  -> exclude jobs already SENT or PENDING for that subscriber
   -> render HTML email template
   -> create tbl_email_queues rows with status PENDING and isHtml=true
+  -> create tbl_subscriber_job_notifications rows with status PENDING for each job in the email
   -> EmailQueueWorker picks pending rows
   -> EmailService sends real SMTP HTML email
   -> queue status becomes SENT or FAILED
+  -> per-job notification status becomes SENT or FAILED
 ```
 
 ## Manual APIs
@@ -91,6 +94,35 @@ Default: waits 30 seconds after app startup, then every 60 seconds pending email
 - `PROCESSING`: worker is sending it.
 - `SENT`: SMTP send succeeded.
 - `FAILED`: max retry count reached.
+
+## Per-Job Delivery Tracking
+
+Each job included in a subscriber email is tracked in:
+
+```text
+tbl_subscriber_job_notifications
+```
+
+Tracked fields:
+
+- `subscriber_id`
+- `job_id`
+- `email_queue_id`
+- `email`
+- `status`
+- `sent_at`
+- `failed_at`
+- `error_message`
+
+Tracking statuses:
+
+- `PENDING`: the job is already queued for this subscriber.
+- `SENT`: the job was successfully sent to this subscriber.
+- `FAILED`: the queue reached max retry and this job was not delivered.
+
+Matching excludes jobs with `SENT` or `PENDING` tracking records for that subscriber. This prevents duplicate delivery while still allowing jobs with `FAILED` tracking to be retried later.
+
+`Subscriber.lastEmailSentAt` is now metadata for the last successful email batch. Duplicate prevention is handled by `tbl_subscriber_job_notifications`.
 
 ## HTML Template
 
@@ -181,4 +213,4 @@ When SMTP send fails, the worker increases `retryCount` and delays the next atte
 
 ## lastEmailSentAt Behavior
 
-`Subscriber.lastEmailSentAt` is updated only after the queue item is sent successfully. This avoids marking jobs as delivered when SMTP failed.
+`Subscriber.lastEmailSentAt` is updated only after the queue item is sent successfully. This avoids marking a batch as delivered when SMTP failed.

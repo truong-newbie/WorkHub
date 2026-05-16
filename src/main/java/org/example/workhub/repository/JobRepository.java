@@ -1,5 +1,6 @@
 package org.example.workhub.repository;
 
+import org.example.workhub.constant.SubscriberJobNotificationStatus;
 import org.example.workhub.domain.entity.Job;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -35,12 +36,20 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
               AND sk.id IN :skillIds
               AND j.createdDate > :since
               AND (j.expiredAt IS NULL OR j.expiredAt > :now)
+              AND NOT EXISTS (
+                  SELECT n.id FROM SubscriberJobNotification n
+                  WHERE n.subscriber.id = :subscriberId
+                    AND n.job.id = j.id
+                    AND n.status IN :excludedStatuses
+              )
             ORDER BY j.createdDate DESC
             """)
-    List<Job> findNewPublishedJobsBySkillIds(
+    List<Job> findUnsentPublishedJobsBySkillIds(
+            @Param("subscriberId") Long subscriberId,
             @Param("skillIds") List<Long> skillIds,
             @Param("since") LocalDateTime since,
-            @Param("now") Instant now
+            @Param("now") Instant now,
+            @Param("excludedStatuses") List<SubscriberJobNotificationStatus> excludedStatuses
     );
 
     boolean existsBySlug(String slug);
