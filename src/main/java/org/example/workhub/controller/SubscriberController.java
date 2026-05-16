@@ -16,6 +16,7 @@ import org.example.workhub.constant.UrlConstant;
 import org.example.workhub.domain.dto.request.SubscriberCreateRequest;
 import org.example.workhub.domain.dto.request.SubscriberSearchRequest;
 import org.example.workhub.domain.dto.request.SubscriberUpdateRequest;
+import org.example.workhub.service.EmailQueueService;
 import org.example.workhub.service.SubscriberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 public class SubscriberController {
 
     SubscriberService subscriberService;
+    EmailQueueService emailQueueService;
 
     @Operation(summary = "Create subscriber", description = "Candidate subscribes to job emails by skills")
     @ApiResponses(value = {
@@ -138,5 +140,16 @@ public class SubscriberController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
     public ResponseEntity<?> sendMatchingJobEmails() {
         return VsResponseUtil.success(subscriberService.sendMatchingJobEmails());
+    }
+
+    @Operation(summary = "Process email queue", description = "Admin or recruiter manually triggers async email queue worker")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email queue processed"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @PostMapping(UrlConstant.Subscriber.PROCESS_MAIL_QUEUE)
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
+    public ResponseEntity<?> processEmailQueue() {
+        return VsResponseUtil.success(emailQueueService.processPendingEmails());
     }
 }

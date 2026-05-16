@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.constant.ErrorMessage;
 import org.example.workhub.constant.RoleConstant;
-import org.example.workhub.domain.dto.common.MailBody;
 import org.example.workhub.domain.dto.pagination.PaginationResponseDto;
 import org.example.workhub.domain.dto.pagination.PagingMeta;
 import org.example.workhub.domain.dto.request.SubscriberCreateRequest;
@@ -27,7 +26,7 @@ import org.example.workhub.repository.SkillRepository;
 import org.example.workhub.repository.SubscriberRepository;
 import org.example.workhub.repository.UserRepository;
 import org.example.workhub.security.UserPrincipal;
-import org.example.workhub.service.EmailService;
+import org.example.workhub.service.EmailQueueService;
 import org.example.workhub.service.SubscriberService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -60,7 +59,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     private final SkillRepository skillRepository;
     private final JobRepository jobRepository;
     private final SubscriberMapper subscriberMapper;
-    private final EmailService emailService;
+    private final EmailQueueService emailQueueService;
     private final MessageSource messageSource;
 
     @Override
@@ -178,7 +177,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Override
     public SubscriberMailResponse sendMatchingJobEmails() {
         List<Subscriber> subscribers = subscriberRepository.findAllEnabledWithSkills();
-        int sentEmails = 0;
+        int queuedEmails = 0;
         int matchedJobs = 0;
         LocalDateTime now = LocalDateTime.now();
 
@@ -202,21 +201,22 @@ public class SubscriberServiceImpl implements SubscriberService {
                 continue;
             }
 
-            emailService.sendSimpleMessage(MailBody.builder()
-                    .to(subscriber.getEmail())
-                    .subject(getMessage("subscriber.mail.subject"))
-                    .text(buildMatchingJobEmail(subscriber, jobs))
-                    .build());
-
-            subscriber.setLastEmailSentAt(now);
-            subscriberRepository.save(subscriber);
-            sentEmails++;
-            matchedJobs += jobs.size();
+            boolean queued = emailQueueService.enqueueSubscriberMatchingEmail(
+                    subscriber,
+                    getMessage("subscriber.mail.subject"),
+                    buildMatchingJobEmail(subscriber, jobs),
+                    now
+            );
+            if (queued) {
+                queuedEmails++;
+                matchedJobs += jobs.size();
+            }
         }
 
         return SubscriberMailResponse.builder()
                 .checkedSubscribers(subscribers.size())
-                .sentEmails(sentEmails)
+                .sentEmails(0)
+                .queuedEmails(queuedEmails)
                 .matchedJobs(matchedJobs)
                 .build();
     }

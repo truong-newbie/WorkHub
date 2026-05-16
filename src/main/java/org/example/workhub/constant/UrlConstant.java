@@ -116,6 +116,7 @@ public class UrlConstant {
     public static final String ENABLE = PRE_FIX + "/{id}/enable";
     public static final String DISABLE = PRE_FIX + "/{id}/disable";
     public static final String SEND_MAIL = PRE_FIX + "/mail/send";
+    public static final String PROCESS_MAIL_QUEUE = PRE_FIX + "/mail/queue/process";
 
     private Subscriber() {
     }

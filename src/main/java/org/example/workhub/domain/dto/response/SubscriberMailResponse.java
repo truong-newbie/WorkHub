@@ -19,6 +19,9 @@ public class SubscriberMailResponse {
     @Schema(description = "Number of emails sent", example = "3")
     private Integer sentEmails;
 
+    @Schema(description = "Number of emails queued for async sending", example = "3")
+    private Integer queuedEmails;
+
     @Schema(description = "Number of matched jobs", example = "8")
     private Integer matchedJobs;
 }
