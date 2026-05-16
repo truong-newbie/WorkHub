@@ -41,9 +41,17 @@ public class UrlConstant {
   }
 
   public static class Company{
-    public static final String COMPANY_BASE = "/company";
-    public static final String ID = COMPANY_BASE+"/{id}";
-    public static final String ME = COMPANY_BASE+"/me";
+    public static final String COMPANIES_BASE = "/companies";
+    public static final String ID = COMPANIES_BASE+"/{id}";
+    public static final String ME = COMPANIES_BASE+"/me";
+    public static final String LOGO = COMPANIES_BASE+"/{id}/logo";
+    public static final String COVER = COMPANIES_BASE+"/{id}/cover";
+    public static final String ENABLE = COMPANIES_BASE+"/{id}/enable";
+    public static final String DISABLE = COMPANIES_BASE+"/{id}/disable";
+    public static final String APPROVE = COMPANIES_BASE+"/{id}/approve";
+    public static final String REJECT = COMPANIES_BASE+"/{id}/reject";
+    public static final String JOBS = COMPANIES_BASE+"/{id}/jobs";
+    public static final String STATISTICS = COMPANIES_BASE+"/{id}/statistics";
   }
 
   public static class Skill{

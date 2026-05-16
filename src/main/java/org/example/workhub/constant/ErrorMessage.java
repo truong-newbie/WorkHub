@@ -45,6 +45,15 @@ public class ErrorMessage {
   public static class Company{
     public static final String ERR_NOT_FOUND = "exception.company.not.found";
     public static final String ERR_ALREADY_EXISTS_COMPANY = "exception.company.already.exists.company";
+    public static final String ERR_PERMISSION_DENIED = "company.permission.denied";
+    public static final String ERR_INVALID_WEBSITE = "company.invalid.website";
+    public static final String ERR_INVALID_EMAIL = "company.invalid.email";
+    public static final String ERR_INVALID_PHONE = "company.invalid.phone";
+    public static final String ERR_ALREADY_APPROVED = "company.already.approved";
+    public static final String ERR_ALREADY_DISABLED = "company.already.disabled";
+    public static final String ERR_OWNER_NOT_FOUND = "company.owner.not.found";
+    public static final String ERR_FILE_EMPTY = "company.file.empty";
+    public static final String ERR_FILE_INVALID = "company.file.invalid";
   }
 
   public static class Skill{

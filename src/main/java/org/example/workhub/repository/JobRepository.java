@@ -1,7 +1,10 @@
 package org.example.workhub.repository;
 
 import org.example.workhub.constant.SubscriberJobNotificationStatus;
+import org.example.workhub.constant.StatusEnum;
 import org.example.workhub.domain.entity.Job;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +24,18 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.deleted = false")
     List<Job> findByCompanyIdNotDeleted(@Param("companyId") Long companyId);
+
+    @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.deleted = false")
+    Page<Job> findPageByCompanyIdNotDeleted(@Param("companyId") Long companyId, Pageable pageable);
+
+    @Query("""
+            SELECT j FROM Job j
+            WHERE j.company.id = :companyId
+              AND j.deleted = false
+              AND j.published = true
+              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
+            """)
+    Page<Job> findPublicPageByCompanyId(@Param("companyId") Long companyId, @Param("now") Instant now, Pageable pageable);
 
     @Query("SELECT j FROM Job j WHERE j.recruiter.id = :recruiterId AND j.deleted = false")
     List<Job> findByRecruiterIdNotDeleted(@Param("recruiterId") String recruiterId);
@@ -62,4 +77,16 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT COUNT(j) FROM Job j WHERE j.published = false AND j.deleted = false")
     long countDraft();
+
+    long countByCompanyIdAndDeletedFalse(Long companyId);
+
+    long countByCompanyIdAndPublishedTrueAndDeletedFalse(Long companyId);
+
+    long countByCompanyIdAndPublishedFalseAndDeletedFalse(Long companyId);
+
+    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.company.id = :companyId AND a.deleted = false")
+    long countApplicationsByCompanyId(@Param("companyId") Long companyId);
+
+    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.company.id = :companyId AND a.status = :status AND a.deleted = false")
+    long countApplicationsByCompanyIdAndStatus(@Param("companyId") Long companyId, @Param("status") StatusEnum status);
 }
