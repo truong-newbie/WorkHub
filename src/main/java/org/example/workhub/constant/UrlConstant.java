@@ -107,4 +107,18 @@ public class UrlConstant {
     }
   }
 
+  public static class Subscriber{
+    private static final String PRE_FIX = "/subscribers";
+
+    public static final String SUBSCRIBER_BASE = PRE_FIX;
+    public static final String ID = PRE_FIX + "/{id}";
+    public static final String ME = PRE_FIX + "/me";
+    public static final String ENABLE = PRE_FIX + "/{id}/enable";
+    public static final String DISABLE = PRE_FIX + "/{id}/disable";
+    public static final String SEND_MAIL = PRE_FIX + "/mail/send";
+
+    private Subscriber() {
+    }
+  }
+
 }

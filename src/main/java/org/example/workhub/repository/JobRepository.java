@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
@@ -24,6 +26,22 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT j FROM Job j WHERE j.published = true AND j.deleted = false")
     List<Job> findAllPublished();
+
+    @Query("""
+            SELECT DISTINCT j FROM Job j
+            JOIN j.skills sk
+            WHERE j.published = true
+              AND j.deleted = false
+              AND sk.id IN :skillIds
+              AND j.createdDate > :since
+              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
+            ORDER BY j.createdDate DESC
+            """)
+    List<Job> findNewPublishedJobsBySkillIds(
+            @Param("skillIds") List<Long> skillIds,
+            @Param("since") LocalDateTime since,
+            @Param("now") Instant now
+    );
 
     boolean existsBySlug(String slug);
 

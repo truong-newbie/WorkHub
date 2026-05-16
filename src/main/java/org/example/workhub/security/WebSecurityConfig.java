@@ -55,6 +55,8 @@ public class WebSecurityConfig {
                     // Resume endpoints
                     .requestMatchers("/api/v1/resume/**").authenticated()
                     .requestMatchers("/api/v1/job/*/candidates/*/resume/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Subscriber endpoints
+                    .requestMatchers("/api/v1/subscribers/**").authenticated()
                     .anyRequest().authenticated()
             )
 //            .oauth2Login(oauth -> oauth
