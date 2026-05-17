@@ -33,7 +33,7 @@ public class JobApplication extends UserDateAuditing {
     private Resume resume;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false, length = 30)
     private StatusEnum status = StatusEnum.PENDING;
 
     @Column(name = "deleted", nullable = false)

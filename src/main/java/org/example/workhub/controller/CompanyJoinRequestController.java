@@ -28,7 +28,7 @@ public class CompanyJoinRequestController {
 
     @Operation(summary = "Recruiter requests to join a company", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping(UrlConstant.Company.JOIN_REQUESTS)
-    @PreAuthorize("hasRole('RECRUITER')")
+//    @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<?> requestJoinCompany(
             @PathVariable Long companyId,
             @RequestBody @Valid CompanyJoinRequestCreateRequest request) {
