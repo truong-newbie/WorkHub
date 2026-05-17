@@ -28,6 +28,10 @@ public class JobApplication extends UserDateAuditing {
     @JsonIgnore
     private Job job;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id")
+    private Resume resume;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusEnum status = StatusEnum.PENDING;

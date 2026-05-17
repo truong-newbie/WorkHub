@@ -66,6 +66,11 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/job/*/apply").authenticated()
                     .requestMatchers("/api/v1/job/*/applications/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers("/api/v1/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/candidate/jobs/*/apply").hasAnyRole("CANDIDATE", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/candidate/applications").hasAnyRole("CANDIDATE", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/jobs/*/applications").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/jobs/*/screening-results").hasAnyRole("RECRUITER", "ADMIN")
                     // Favorite Job endpoints - All authenticated users
                     .requestMatchers("/api/v1/job/*/favorite/**").authenticated()
                     .requestMatchers("/api/v1/jobs/favorites").authenticated()

@@ -16,6 +16,7 @@ public interface JobApplicationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "job", ignore = true)
+    @Mapping(target = "resume", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "appliedAt", ignore = true)
     @Mapping(target = "reviewedAt", ignore = true)
@@ -29,6 +30,7 @@ public interface JobApplicationMapper {
 
     @Mapping(target = "job", expression = "java(mapJobBasicInfo(application.getJob()))")
     @Mapping(target = "candidate", expression = "java(mapCandidateInfo(application.getUser()))")
+    @Mapping(target = "resumeId", expression = "java(application.getResume() != null ? application.getResume().getId() : null)")
     JobApplicationResponse toResponse(JobApplication application);
 
     List<JobApplicationResponse> toResponses(List<JobApplication> applications);

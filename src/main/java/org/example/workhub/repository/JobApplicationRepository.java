@@ -19,6 +19,9 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     @Query("SELECT ja FROM JobApplication ja WHERE ja.id = :id")
     Optional<JobApplication> findById(@Param("id") Long id);
 
+    @Query("SELECT ja FROM JobApplication ja WHERE ja.id = :id AND ja.deleted = false")
+    Optional<JobApplication> findByIdAndDeletedFalse(@Param("id") Long id);
+
     @Query("SELECT ja FROM JobApplication ja WHERE ja.job.id = :jobId AND ja.deleted = false")
     Page<JobApplication> findByJobId(@Param("jobId") Long jobId, Pageable pageable);
 
@@ -29,6 +32,11 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     Optional<JobApplication> findByJobIdAndUserId(@Param("jobId") Long jobId, @Param("userId") String userId);
 
     boolean existsByJobIdAndUserIdAndDeletedFalse(Long jobId, String userId);
+
+    boolean existsByJobIdAndUserIdAndResumeIdAndDeletedFalse(Long jobId, String userId, Long resumeId);
+
+    @Query("SELECT ja FROM JobApplication ja WHERE ja.job.id = :jobId AND ja.status = :status AND ja.deleted = false")
+    Page<JobApplication> findByJobIdAndStatus(@Param("jobId") Long jobId, @Param("status") StatusEnum status, Pageable pageable);
 
     @Query("SELECT COUNT(ja) FROM JobApplication ja WHERE ja.job.id = :jobId AND ja.deleted = false")
     long countByJobId(@Param("jobId") Long jobId);

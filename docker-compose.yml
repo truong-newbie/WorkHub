@@ -1,36 +1,52 @@
 services:
-  # Cấu hình cho dịch vụ Cơ sở dữ liệu MySQL
   mysql:
-    image: mysql:8.0 # Sử dụng phiên bản MySQL 8.0
-    container_name: mysql # Đặt tên cho container là 'mysql'
+    image: mysql:8.0
+    container_name: mysql
     cap_add:
-      - SYS_NICE # Cấp quyền ưu tiên hệ thống để MySQL chạy ổn định hơn
-    restart: always # Tự động khởi động lại nếu bị lỗi hoặc máy tính khởi động lại
+      - SYS_NICE
+    restart: always
     environment:
-      - MYSQL_DATABASE=testdb # Tạo sẵn một database tên là 'testdb'
-      - MYSQL_ROOT_PASSWORD=password # Đặt mật khẩu quản trị là 'password'
+      - MYSQL_DATABASE=testdb
+      - MYSQL_ROOT_PASSWORD=password
     ports:
-      - '3306:3306' # Kết nối cổng 3306 của máy bạn vào cổng 3306 của container
+      - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql # Lưu dữ liệu vào ổ đĩa ảo để không bị mất khi xóa container
-      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql # Tự động chạy file script SQL khi khởi tạo
+      - mysql_data:/var/lib/mysql
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     networks:
-      - default # Sử dụng mạng mặc định để giao tiếp với backend
+      - default
 
-  # Cấu hình cho ứng dụng Java của bạn (Backend)
-  backend-service:
-    container_name: backend-service # Tên container của ứng dụng
+  ai-worker:
+    container_name: ai-worker
     build:
-      context: ./ # Tìm Dockerfile ở thư mục hiện tại để build
+      context: ./ai-worker
       dockerfile: Dockerfile
     ports:
-      - "8080:8080" # Mở cổng 8080 để bạn truy cập ứng dụng từ trình duyệt
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
     networks:
-      - default # Kết nối chung mạng với MySQL
+      - default
+
+  backend-service:
+    container_name: backend-service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - AI_WORKER_BASE_URL=http://ai-worker:8000
+      - AI_WORKER_MOCK_ENABLED=false
+    depends_on:
+      - mysql
+      - ai-worker
+    networks:
+      - default
 
 networks:
   default:
-    name: backend-service # Đặt tên cho mạng nội bộ
+    name: backend-service
 
 volumes:
-  mysql_data: # Khai báo ổ đĩa ảo để lưu trữ dữ liệu MySQL
+  mysql_data:

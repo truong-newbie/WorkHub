@@ -50,6 +50,15 @@ public class JobApplicationController {
         return VsResponseUtil.success(HttpStatus.CREATED, applicationService.applyJob(jobId, request));
     }
 
+    @Operation(summary = "Candidate applies to a job with uploaded resume", description = "ATS flow endpoint for candidate applications")
+    @PostMapping("/candidate/jobs/{jobId}/apply")
+    @PreAuthorize("hasRole('CANDIDATE') or hasRole('ADMIN')")
+    public ResponseEntity<?> candidateApplyJob(
+            @PathVariable @Parameter(description = "Job ID") Long jobId,
+            @RequestBody @Valid JobApplicationRequest request) {
+        return VsResponseUtil.success(HttpStatus.CREATED, applicationService.applyJob(jobId, request));
+    }
+
     @Operation(summary = "Withdraw application", description = "Withdraw job application (Candidate)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Application withdrawn successfully"),
@@ -76,6 +85,15 @@ public class JobApplicationController {
         return VsResponseUtil.success(applicationService.getMyApplications(page, size));
     }
 
+    @Operation(summary = "Get current candidate applications", description = "ATS flow endpoint for candidate application list")
+    @GetMapping("/candidate/applications")
+    @PreAuthorize("hasRole('CANDIDATE') or hasRole('ADMIN')")
+    public ResponseEntity<?> getCandidateApplications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return VsResponseUtil.success(applicationService.getMyApplications(page, size));
+    }
+
     // ========== Recruiter APIs ==========
 
     @Operation(summary = "Get job applicants", description = "View applicants for a job (Recruiter)")
@@ -87,6 +105,16 @@ public class JobApplicationController {
     @GetMapping(UrlConstant.JobApplication.JOB_APPLICATIONS)
     @PreAuthorize("hasRole('RECRUITER') or hasRole('ADMIN')")
     public ResponseEntity<?> getJobApplicants(
+            @PathVariable @Parameter(description = "Job ID") Long jobId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return VsResponseUtil.success(applicationService.getJobApplicants(jobId, page, size));
+    }
+
+    @Operation(summary = "Get recruiter job applications", description = "ATS flow endpoint for recruiter application list")
+    @GetMapping("/recruiter/jobs/{jobId}/applications")
+    @PreAuthorize("hasRole('RECRUITER') or hasRole('ADMIN')")
+    public ResponseEntity<?> getRecruiterJobApplications(
             @PathVariable @Parameter(description = "Job ID") Long jobId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
