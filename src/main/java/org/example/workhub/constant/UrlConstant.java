@@ -52,6 +52,11 @@ public class UrlConstant {
     public static final String REJECT = COMPANIES_BASE+"/{id}/reject";
     public static final String JOBS = COMPANIES_BASE+"/{id}/jobs";
     public static final String STATISTICS = COMPANIES_BASE+"/{id}/statistics";
+    public static final String JOIN_REQUESTS = COMPANIES_BASE+"/{companyId}/join-requests";
+    public static final String JOIN_REQUESTS_ME = COMPANIES_BASE+"/join-requests/me";
+    public static final String JOIN_REQUEST_ID = COMPANIES_BASE+"/join-requests/{requestId}";
+    public static final String APPROVE_JOIN_REQUEST = JOIN_REQUEST_ID+"/approve";
+    public static final String REJECT_JOIN_REQUEST = JOIN_REQUEST_ID+"/reject";
   }
 
   public static class Skill{
