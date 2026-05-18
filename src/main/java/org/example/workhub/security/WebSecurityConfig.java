@@ -75,6 +75,9 @@ public class WebSecurityConfig {
                     // Subscriber endpoints
                     .requestMatchers(HttpMethod.GET, "/api/v1/subscribers/unsubscribe").permitAll()
                     .requestMatchers("/api/v1/subscribers/**").authenticated()
+                    // Assessment endpoints
+                    .requestMatchers("/api/v1/recruiter/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/candidate/**").authenticated()
                     .anyRequest().authenticated()
             )
 //            .oauth2Login(oauth -> oauth
