@@ -1,10 +1,6 @@
 package org.example.workhub.repository;
 
-import org.example.workhub.constant.SubscriberJobNotificationStatus;
-import org.example.workhub.constant.StatusEnum;
 import org.example.workhub.domain.entity.Job;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,8 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
@@ -25,68 +19,11 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.deleted = false")
     List<Job> findByCompanyIdNotDeleted(@Param("companyId") Long companyId);
 
-    @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.deleted = false")
-    Page<Job> findPageByCompanyIdNotDeleted(@Param("companyId") Long companyId, Pageable pageable);
-
-    @Query("""
-            SELECT j FROM Job j
-            WHERE j.company.id = :companyId
-              AND j.deleted = false
-              AND j.published = true
-              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
-            """)
-    Page<Job> findPublicPageByCompanyId(@Param("companyId") Long companyId, @Param("now") Instant now, Pageable pageable);
-
     @Query("SELECT j FROM Job j WHERE j.recruiter.id = :recruiterId AND j.deleted = false")
     List<Job> findByRecruiterIdNotDeleted(@Param("recruiterId") String recruiterId);
 
     @Query("SELECT j FROM Job j WHERE j.published = true AND j.deleted = false")
     List<Job> findAllPublished();
-
-    @Query("""
-            SELECT j FROM Job j
-            WHERE j.published = true
-              AND j.deleted = false
-              AND (j.company IS NULL OR j.company.active = true)
-              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
-            """)
-    Page<Job> findAvailablePublishedJobs(@Param("now") Instant now, Pageable pageable);
-
-    @Query("""
-            SELECT DISTINCT j FROM Job j
-            LEFT JOIN FETCH j.company
-            LEFT JOIN FETCH j.skills
-            WHERE j.published = true
-              AND j.deleted = false
-              AND (j.company IS NULL OR j.company.active = true)
-              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
-            ORDER BY j.createdDate DESC
-            """)
-    List<Job> findAvailablePublishedJobs(@Param("now") Instant now);
-
-    @Query("""
-            SELECT DISTINCT j FROM Job j
-            JOIN j.skills sk
-            WHERE j.published = true
-              AND j.deleted = false
-              AND sk.id IN :skillIds
-              AND j.createdDate > :since
-              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
-              AND NOT EXISTS (
-                  SELECT n.id FROM SubscriberJobNotification n
-                  WHERE n.subscriber.id = :subscriberId
-                    AND n.job.id = j.id
-                    AND n.status IN :excludedStatuses
-              )
-            ORDER BY j.createdDate DESC
-            """)
-    List<Job> findUnsentPublishedJobsBySkillIds(
-            @Param("subscriberId") Long subscriberId,
-            @Param("skillIds") List<Long> skillIds,
-            @Param("since") LocalDateTime since,
-            @Param("now") Instant now,
-            @Param("excludedStatuses") List<SubscriberJobNotificationStatus> excludedStatuses
-    );
 
     boolean existsBySlug(String slug);
 
@@ -98,16 +35,4 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("SELECT COUNT(j) FROM Job j WHERE j.published = false AND j.deleted = false")
     long countDraft();
-
-    long countByCompanyIdAndDeletedFalse(Long companyId);
-
-    long countByCompanyIdAndPublishedTrueAndDeletedFalse(Long companyId);
-
-    long countByCompanyIdAndPublishedFalseAndDeletedFalse(Long companyId);
-
-    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.company.id = :companyId AND a.deleted = false")
-    long countApplicationsByCompanyId(@Param("companyId") Long companyId);
-
-    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.company.id = :companyId AND a.status = :status AND a.deleted = false")
-    long countApplicationsByCompanyIdAndStatus(@Param("companyId") Long companyId, @Param("status") StatusEnum status);
 }

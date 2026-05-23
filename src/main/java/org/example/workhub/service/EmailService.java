@@ -6,5 +6,4 @@ import org.example.workhub.domain.dto.common.MailBody;
 public interface EmailService {
     void sendSimpleMessage(MailBody mailBody);
 
-    void sendHtmlMessage(MailBody mailBody);
 }
