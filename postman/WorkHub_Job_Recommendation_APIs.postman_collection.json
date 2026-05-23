@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "WorkHub Job Recommendation APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Latest Jobs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/latest?page=0&size=10&sortBy=createdDate&sortDir=DESC",
+          "host": ["{{baseUrl}}"],
+          "path": ["jobs", "latest"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" },
+            { "key": "sortBy", "value": "createdDate" },
+            { "key": "sortDir", "value": "DESC" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Candidate Onboarding Status",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{candidateToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/candidate/onboarding-status",
+          "host": ["{{baseUrl}}"],
+          "path": ["candidate", "onboarding-status"]
+        }
+      }
+    },
+    {
+      "name": "Create Candidate Job Preference",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{candidateToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"desiredJobTitle\": \"Java Backend Developer\",\n  \"preferredLocation\": \"Ha Noi\",\n  \"workMode\": \"HYBRID\",\n  \"employmentType\": \"FULL_TIME\",\n  \"candidateLevel\": \"JUNIOR\",\n  \"experienceYears\": 1,\n  \"expectedSalaryMin\": 800,\n  \"expectedSalaryMax\": 1500,\n  \"skillIds\": [1, 2, 3]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/candidate/job-preference",
+          "host": ["{{baseUrl}}"],
+          "path": ["candidate", "job-preference"]
+        }
+      }
+    },
+    {
+      "name": "Get My Candidate Job Preference",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{candidateToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/candidate/job-preference",
+          "host": ["{{baseUrl}}"],
+          "path": ["candidate", "job-preference"]
+        }
+      }
+    },
+    {
+      "name": "Update Candidate Job Preference",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{candidateToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"desiredJobTitle\": \"Spring Boot Developer\",\n  \"preferredLocation\": \"Remote\",\n  \"workMode\": \"REMOTE\",\n  \"employmentType\": \"FULL_TIME\",\n  \"candidateLevel\": \"MIDDLE\",\n  \"experienceYears\": 3,\n  \"expectedSalaryMin\": 1200,\n  \"expectedSalaryMax\": 2500,\n  \"skillIds\": [1, 2, 4]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/candidate/job-preference",
+          "host": ["{{baseUrl}}"],
+          "path": ["candidate", "job-preference"]
+        }
+      }
+    },
+    {
+      "name": "Recommended Jobs",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{candidateToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/candidate/jobs/recommended?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["candidate", "jobs", "recommended"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "candidateToken", "value": "" }
+  ]
+}

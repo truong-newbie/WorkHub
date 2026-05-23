@@ -87,6 +87,14 @@ public class ErrorMessage {
     public static final String ERR_NOT_FAVORITE = "exception.favorite.not.found";
   }
 
+  public static class CandidateJobPreference {
+    public static final String ERR_ALREADY_EXISTS = "exception.candidate.preference.already.exists";
+    public static final String ERR_NOT_FOUND = "exception.candidate.preference.not.found";
+    public static final String ERR_REQUIRED = "exception.candidate.preference.required";
+    public static final String ERR_INVALID_SALARY_RANGE = "exception.candidate.preference.invalid.salary.range";
+    public static final String ERR_SKILL_NOT_FOUND = "exception.candidate.preference.skill.not.found";
+  }
+
   public static class Resume{
     public static final String ERR_NOT_FOUND = "resume.not.found";
     public static final String ERR_FILE_INVALID = "resume.file.invalid";
