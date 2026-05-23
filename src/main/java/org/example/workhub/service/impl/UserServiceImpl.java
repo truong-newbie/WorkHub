@@ -89,6 +89,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updateUser(String id, UserUpdateRequest request) {
         User user = findUserByIdNotDeleted(id);
+        boolean currentUserIsAdmin = isCurrentUserAdmin();
 
         // Validate email unique (excluding current user)
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
@@ -110,6 +111,9 @@ public class UserServiceImpl implements UserService {
 
         // Update company if provided
         if (request.getCompanyId() != null) {
+            if (!currentUserIsAdmin) {
+                throw new ForbiddenException("Only admin can assign company directly. Recruiters must use company join requests.");
+            }
             if (request.getCompanyId().isEmpty()) {
                 user.setCompany(null);
             } else {
@@ -369,6 +373,16 @@ public class UserServiceImpl implements UserService {
         }
 
         return (UserPrincipal) authentication.getPrincipal();
+    }
+
+    private boolean isCurrentUserAdmin() {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> RoleConstant.ADMIN.equals(authority.getAuthority()));
     }
 
     private Pageable buildPageable(UserFilterRequest filter) {

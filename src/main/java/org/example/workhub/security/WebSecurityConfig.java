@@ -38,6 +38,25 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/v1/auth/**", "/auth/**","api/v1/forgot-password/**").permitAll()
                     .requestMatchers("/api/v1/user/me/**").authenticated()
                     .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
+                    // Company endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/companies/me").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/companies/me").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/companies/*/statistics").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*/enable", "/api/v1/companies/*/disable",
+                            "/api/v1/companies/*/approve", "/api/v1/companies/*/reject").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/companies/*/logo", "/api/v1/companies/*/cover").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/companies/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/companies/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Skill endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/skills/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/skills/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/skills/**").hasRole("ADMIN")
+                    // Job recommendation endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/jobs/latest").permitAll()
                     // Job endpoints - Public view, authenticated search
                     .requestMatchers(HttpMethod.GET, "/api/v1/job/**").authenticated()
                     // Job write operations - Recruiter/Admin only
@@ -55,6 +74,12 @@ public class WebSecurityConfig {
                     // Resume endpoints
                     .requestMatchers("/api/v1/resume/**").authenticated()
                     .requestMatchers("/api/v1/job/*/candidates/*/resume/**").hasAnyRole("RECRUITER", "ADMIN")
+                    // Subscriber endpoints
+                    .requestMatchers(HttpMethod.GET, "/api/v1/subscribers/unsubscribe").permitAll()
+                    .requestMatchers("/api/v1/subscribers/**").authenticated()
+                    // Assessment endpoints
+                    .requestMatchers("/api/v1/recruiter/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/candidate/**").authenticated()
                     .anyRequest().authenticated()
             )
 //            .oauth2Login(oauth -> oauth
