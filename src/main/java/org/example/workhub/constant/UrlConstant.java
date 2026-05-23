@@ -107,6 +107,22 @@ public class UrlConstant {
     }
   }
 
+  public static class JobRecommendation{
+    public static final String LATEST_JOBS = "/jobs/latest";
+    public static final String RECOMMENDED_JOBS = "/candidate/jobs/recommended";
+
+    private JobRecommendation() {
+    }
+  }
+
+  public static class CandidateJobPreference{
+    public static final String ONBOARDING_STATUS = "/candidate/onboarding-status";
+    public static final String JOB_PREFERENCE = "/candidate/job-preference";
+
+    private CandidateJobPreference() {
+    }
+  }
+
   public static class Resume{
     private static final String PRE_FIX = "/resume";
 

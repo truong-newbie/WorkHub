@@ -87,6 +87,14 @@ public class ErrorMessage {
     public static final String ERR_NOT_FAVORITE = "exception.favorite.not.found";
   }
 
+  public static class CandidateJobPreference {
+    public static final String ERR_ALREADY_EXISTS = "exception.candidate.preference.already.exists";
+    public static final String ERR_NOT_FOUND = "exception.candidate.preference.not.found";
+    public static final String ERR_REQUIRED = "exception.candidate.preference.required";
+    public static final String ERR_INVALID_SALARY_RANGE = "exception.candidate.preference.invalid.salary.range";
+    public static final String ERR_SKILL_NOT_FOUND = "exception.candidate.preference.skill.not.found";
+  }
+
   public static class Resume{
     public static final String ERR_NOT_FOUND = "resume.not.found";
     public static final String ERR_FILE_INVALID = "resume.file.invalid";
@@ -105,6 +113,28 @@ public class ErrorMessage {
     public static final String ERR_INVALID_EMAIL = "subscriber.invalid.email";
     public static final String ERR_SKILL_EMPTY = "subscriber.skill.empty";
     public static final String ERR_INVALID_UNSUBSCRIBE_TOKEN = "subscriber.unsubscribe.token.invalid";
+  }
+
+  public static class Assessment {
+    public static final String ERR_TEST_NOT_FOUND = "exception.assessment.test.not.found";
+    public static final String ERR_QUESTION_NOT_FOUND = "exception.assessment.question.not.found";
+    public static final String ERR_ASSIGNMENT_NOT_FOUND = "exception.assessment.assignment.not.found";
+    public static final String ERR_ANSWER_NOT_FOUND = "exception.assessment.answer.not.found";
+    public static final String ERR_NOT_OWNER = "exception.assessment.not.owner";
+    public static final String ERR_TEST_NOT_PUBLISHED = "exception.assessment.test.not.published";
+    public static final String ERR_TEST_EXPIRED = "exception.assessment.test.expired";
+    public static final String ERR_ALREADY_SUBMITTED = "exception.assessment.already.submitted";
+    public static final String ERR_ALREADY_ASSIGNED = "exception.assessment.already.assigned";
+    public static final String ERR_INVALID_QUESTION = "exception.assessment.invalid.question";
+    public static final String ERR_INVALID_OPTION = "exception.assessment.invalid.option";
+    public static final String ERR_INVALID_SCORE = "exception.assessment.invalid.score";
+    public static final String ERR_NO_QUESTIONS = "exception.assessment.no.questions";
+    public static final String ERR_MC_OPTIONS_REQUIRED = "exception.assessment.multiple.choice.options.required";
+    public static final String ERR_MC_CORRECT_REQUIRED = "exception.assessment.multiple.choice.correct.required";
+    public static final String ERR_DURATION_EXCEEDED = "exception.assessment.duration.exceeded";
+    public static final String ERR_INVALID_ASSIGNMENT_APPLICATION = "exception.assessment.invalid.assignment.application";
+    public static final String ERR_INVALID_ASSIGNMENT_STATUS = "exception.assessment.invalid.assignment.status";
+    public static final String ERR_DUPLICATE_ANSWER = "exception.assessment.duplicate.answer";
   }
 
 }
