@@ -41,32 +41,15 @@ public class UrlConstant {
   }
 
   public static class Company{
-    public static final String COMPANIES_BASE = "/companies";
-    public static final String ID = COMPANIES_BASE+"/{id}";
-    public static final String ME = COMPANIES_BASE+"/me";
-    public static final String LOGO = COMPANIES_BASE+"/{id}/logo";
-    public static final String COVER = COMPANIES_BASE+"/{id}/cover";
-    public static final String ENABLE = COMPANIES_BASE+"/{id}/enable";
-    public static final String DISABLE = COMPANIES_BASE+"/{id}/disable";
-    public static final String APPROVE = COMPANIES_BASE+"/{id}/approve";
-    public static final String REJECT = COMPANIES_BASE+"/{id}/reject";
-    public static final String JOBS = COMPANIES_BASE+"/{id}/jobs";
-    public static final String STATISTICS = COMPANIES_BASE+"/{id}/statistics";
-    public static final String JOIN_REQUESTS = COMPANIES_BASE+"/{companyId}/join-requests";
-    public static final String JOIN_REQUESTS_ME = COMPANIES_BASE+"/join-requests/me";
-    public static final String JOIN_REQUEST_ID = COMPANIES_BASE+"/join-requests/{requestId}";
-    public static final String APPROVE_JOIN_REQUEST = JOIN_REQUEST_ID+"/approve";
-    public static final String REJECT_JOIN_REQUEST = JOIN_REQUEST_ID+"/reject";
+    public static final String COMPANY_BASE = "/company";
+    public static final String ID = COMPANY_BASE+"/{id}";
+    public static final String ME = COMPANY_BASE+"/me";
   }
 
   public static class Skill{
-    public static final String SKILL_BASE="/skills";
+    public static final String SKILL_BASE="/skill";
     public static final String ID= SKILL_BASE +"/{id}";
-    public static final String ENABLE=SKILL_BASE+"/{id}/enable";
-    public static final String DISABLE=SKILL_BASE+"/{id}/disable";
-    public static final String SEARCH=SKILL_BASE+"/search";
-    public static final String POPULAR=SKILL_BASE+"/popular";
-    public static final String SUGGESTIONS=SKILL_BASE+"/suggestions";
+    public static final String ME=SKILL_BASE+"/me";
   }
 
   public static class Job{
@@ -107,22 +90,6 @@ public class UrlConstant {
     }
   }
 
-  public static class JobRecommendation{
-    public static final String LATEST_JOBS = "/jobs/latest";
-    public static final String RECOMMENDED_JOBS = "/candidate/jobs/recommended";
-
-    private JobRecommendation() {
-    }
-  }
-
-  public static class CandidateJobPreference{
-    public static final String ONBOARDING_STATUS = "/candidate/onboarding-status";
-    public static final String JOB_PREFERENCE = "/candidate/job-preference";
-
-    private CandidateJobPreference() {
-    }
-  }
-
   public static class Resume{
     private static final String PRE_FIX = "/resume";
 
@@ -137,22 +104,6 @@ public class UrlConstant {
     public static final String RECRUITER_DOWNLOAD = "/job/{jobId}/candidates/{candidateId}/resume/download";
 
     private Resume() {
-    }
-  }
-
-  public static class Subscriber{
-    private static final String PRE_FIX = "/subscribers";
-
-    public static final String SUBSCRIBER_BASE = PRE_FIX;
-    public static final String ID = PRE_FIX + "/{id}";
-    public static final String ME = PRE_FIX + "/me";
-    public static final String ENABLE = PRE_FIX + "/{id}/enable";
-    public static final String DISABLE = PRE_FIX + "/{id}/disable";
-    public static final String SEND_MAIL = PRE_FIX + "/mail/send";
-    public static final String PROCESS_MAIL_QUEUE = PRE_FIX + "/mail/queue/process";
-    public static final String UNSUBSCRIBE = PRE_FIX + "/unsubscribe";
-
-    private Subscriber() {
     }
   }
 
