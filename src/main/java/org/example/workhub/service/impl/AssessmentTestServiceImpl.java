@@ -7,12 +7,14 @@ import org.example.workhub.domain.dto.request.*;
 import org.example.workhub.domain.dto.response.*;
 import org.example.workhub.domain.entity.*;
 import org.example.workhub.domain.mapper.*;
+import org.example.workhub.event.AssessmentAssignedEvent;
 import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.ForbiddenException;
 import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.*;
 import org.example.workhub.service.AssessmentTestService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +41,7 @@ public class AssessmentTestServiceImpl implements AssessmentTestService {
     private final CandidateTestAssignmentMapper assignmentMapper;
     private final CandidateAnswerMapper answerMapper;
     private final AssessmentSecuritySupport securitySupport;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public AssessmentTestResponse createTest(Long jobId, AssessmentTestCreateRequest request) {
@@ -171,7 +174,14 @@ public class AssessmentTestServiceImpl implements AssessmentTestService {
             assignment.setStatus(AssignmentStatus.ASSIGNED);
             assignment.setMaxScore(calculateMaxScore(test));
             assignment.setTotalScore(0D);
-            createdAssignments.add(assignmentRepository.save(assignment));
+            CandidateTestAssignment savedAssignment = assignmentRepository.save(assignment);
+            createdAssignments.add(savedAssignment);
+            eventPublisher.publishEvent(new AssessmentAssignedEvent(
+                    savedAssignment.getCandidate(),
+                    test.getRecruiter(),
+                    test.getJob() != null ? test.getJob().getTitle() : "this job",
+                    savedAssignment.getId()
+            ));
         }
         return assignmentMapper.toResponses(createdAssignments);
     }

@@ -36,8 +36,10 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers("/api/v1/auth/**", "/auth/**","api/v1/forgot-password/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
                     .requestMatchers("/api/v1/user/me/**").authenticated()
                     .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/notifications/**").authenticated()
                     // Company endpoints
                     .requestMatchers(HttpMethod.GET, "/api/v1/companies/me").authenticated()
                     .requestMatchers(HttpMethod.PUT, "/api/v1/companies/me").hasAnyRole("RECRUITER", "ADMIN")

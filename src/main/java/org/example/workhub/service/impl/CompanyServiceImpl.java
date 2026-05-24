@@ -20,6 +20,7 @@ import org.example.workhub.domain.entity.User;
 import org.example.workhub.domain.mapper.CompanyMapper;
 import org.example.workhub.domain.mapper.JobMapper;
 import org.example.workhub.domain.specification.CompanySpecification;
+import org.example.workhub.event.CompanyModeratedEvent;
 import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ForbiddenException;
 import org.example.workhub.exception.NotFoundException;
@@ -29,6 +30,7 @@ import org.example.workhub.repository.UserRepository;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.CompanyService;
 import org.example.workhub.util.UploadFileUtil;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +62,7 @@ public class CompanyServiceImpl implements CompanyService {
     CompanyMapper companyMapper;
     JobMapper jobMapper;
     UploadFileUtil uploadFileUtil;
+    ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -181,20 +184,38 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyResponseDto approve(Long id) {
+        User moderator = getUserFromPrincipal(getCurrentUserPrincipal());
         Company company = getCompanyOrThrow(id);
         if (Boolean.TRUE.equals(company.getVerified())) {
             throw new BadRequestException(ErrorMessage.Company.ERR_ALREADY_APPROVED);
         }
         company.setVerified(true);
         company.setActive(true);
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyModeratedEvent(
+                getCompanyNotificationRecipients(saved),
+                moderator,
+                saved.getName(),
+                saved.getId(),
+                true
+        ));
+        return companyMapper.toDto(saved);
     }
 
     @Override
     public CompanyResponseDto reject(Long id) {
+        User moderator = getUserFromPrincipal(getCurrentUserPrincipal());
         Company company = getCompanyOrThrow(id);
         company.setVerified(false);
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyModeratedEvent(
+                getCompanyNotificationRecipients(saved),
+                moderator,
+                saved.getName(),
+                saved.getId(),
+                false
+        ));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -397,6 +418,17 @@ public class CompanyServiceImpl implements CompanyService {
             return null;
         }
         return value.trim();
+    }
+
+    private List<User> getCompanyNotificationRecipients(Company company) {
+        List<User> recipients = new ArrayList<>();
+        if (company.getOwner() != null) {
+            recipients.add(company.getOwner());
+        }
+        if (company.getUsers() != null) {
+            recipients.addAll(company.getUsers());
+        }
+        return recipients;
     }
 
     private Pageable buildPageable(CompanySearchRequest request) {
