@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.time.Instant;
+import java.util.List;
 
 @Repository
 public interface FavoriteJobRepository extends JpaRepository<FavoriteJob, Long> {
@@ -23,4 +25,24 @@ public interface FavoriteJobRepository extends JpaRepository<FavoriteJob, Long> 
 
     @Query("SELECT COUNT(fj) FROM FavoriteJob fj WHERE fj.user.id = :userId AND fj.deleted = false")
     long countByUserId(@Param("userId") String userId);
+
+    @Query("""
+            SELECT fj FROM FavoriteJob fj
+            LEFT JOIN FETCH fj.job j
+            LEFT JOIN FETCH j.skills
+            LEFT JOIN FETCH j.company
+            WHERE fj.user.id = :userId
+              AND fj.deleted = false
+              AND (fj.createdAt IS NULL OR fj.createdAt >= :since)
+            """)
+    List<FavoriteJob> findActiveByUserIdSince(@Param("userId") String userId, @Param("since") Instant since);
+
+    @Query("""
+            SELECT fj FROM FavoriteJob fj
+            LEFT JOIN FETCH fj.job j
+            LEFT JOIN FETCH j.skills
+            WHERE fj.deleted = false
+              AND (fj.createdAt IS NULL OR fj.createdAt >= :since)
+            """)
+    List<FavoriteJob> findAllActiveSince(@Param("since") Instant since);
 }

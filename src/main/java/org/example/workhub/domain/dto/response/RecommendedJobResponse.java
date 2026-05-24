@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.workhub.constant.WorkMode;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,21 +16,33 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RecommendedJobResponse {
 
     private Long jobId;
 
+    private Long id;
+
     private String title;
 
+    private String slug;
+
+    private Long companyId;
+
     private String companyName;
+
+    private String companyLogo;
 
     private String location;
 
     private String salaryMin;
 
     private String salaryMax;
+
+    private Boolean negotiableSalary;
+
+    private String level;
 
     private Integer experienceYears;
 
@@ -39,11 +52,29 @@ public class RecommendedJobResponse {
 
     private Double matchScore;
 
+    private Double contentScore;
+
+    private Double behaviorScore;
+
+    private Double collaborativeScore;
+
+    private Double hybridScore;
+
+    private List<String> skillNames;
+
+    private Instant expiredAt;
+
     private List<String> matchedSkills;
 
     private List<String> missingSkills;
 
     private List<String> matchReasons;
+
+    private List<String> reasonCodes;
+
+    private List<RecommendationReasonResponse> reasons;
+
+    private String reasonText;
 
     private LocalDateTime createdDate;
 }

@@ -2,6 +2,7 @@ package org.example.workhub;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.workhub.config.RecommendationProperties;
 import org.example.workhub.config.properties.AdminInfoProperties;
 import org.example.workhub.constant.RoleConstant;
 import org.example.workhub.domain.entity.Role;
@@ -21,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Slf4j
 @RequiredArgsConstructor
-@EnableConfigurationProperties({AdminInfoProperties.class})
+@EnableConfigurationProperties({AdminInfoProperties.class, RecommendationProperties.class})
 @SpringBootApplication
 @EnableScheduling
 public class WorkHubApplication {

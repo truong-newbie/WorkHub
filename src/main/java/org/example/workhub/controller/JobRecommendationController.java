@@ -40,9 +40,21 @@ public class JobRecommendationController {
     @GetMapping(UrlConstant.JobRecommendation.RECOMMENDED_JOBS)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getRecommendedJobs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return VsResponseUtil.success(jobRecommendationService.getRecommendedJobs(PageRequest.of(normalizePage(page), normalizeSize(size))));
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = "false") boolean refresh,
+            @RequestParam(defaultValue = "true") boolean explain) {
+        int resolvedPageSize = pageSize == null ? (size == null ? 10 : size) : pageSize;
+        int resolvedPage = page == null ? pageNum - 1 : page;
+        return VsResponseUtil.success(jobRecommendationService.getRecommendedJobs(
+                PageRequest.of(normalizePage(resolvedPage), normalizeSize(resolvedPageSize)),
+                location,
+                refresh,
+                explain
+        ));
     }
 
     private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
