@@ -9,4 +9,9 @@ public interface JobRecommendationService {
     PaginationResponseDto<RecommendedJobResponse> getLatestJobs(Pageable pageable);
 
     PaginationResponseDto<RecommendedJobResponse> getRecommendedJobs(Pageable pageable);
+
+    PaginationResponseDto<RecommendedJobResponse> getRecommendedJobs(Pageable pageable,
+                                                                      String location,
+                                                                      boolean refresh,
+                                                                      boolean explain);
 }

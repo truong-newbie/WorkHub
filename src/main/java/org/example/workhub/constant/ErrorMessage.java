@@ -147,4 +147,10 @@ public class ErrorMessage {
     public static final String ERR_REINDEX_FAILED = "exception.search.reindex.failed";
   }
 
+  public static class Recommendation {
+    public static final String ERR_PREFERENCE_NOT_FOUND = "exception.recommendation.preference.not.found";
+    public static final String ERR_JOB_NOT_FOUND = "exception.recommendation.job.not.found";
+    public static final String ERR_INVALID_WEIGHT_CONFIG = "exception.recommendation.invalid.weight.config";
+  }
+
 }

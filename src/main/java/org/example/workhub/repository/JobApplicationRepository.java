@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 
 @Repository
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long>, JpaSpecificationExecutor<JobApplication> {
@@ -41,4 +42,24 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     @Query("SELECT ja FROM JobApplication ja WHERE ja.job.company.id = :companyId AND ja.deleted = false")
     Page<JobApplication> findByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
+
+    @Query("""
+            SELECT ja FROM JobApplication ja
+            LEFT JOIN FETCH ja.job j
+            LEFT JOIN FETCH j.skills
+            LEFT JOIN FETCH j.company
+            WHERE ja.user.id = :userId
+              AND ja.deleted = false
+              AND (ja.appliedAt IS NULL OR ja.appliedAt >= :since)
+            """)
+    List<JobApplication> findActiveByUserIdSince(@Param("userId") String userId, @Param("since") Instant since);
+
+    @Query("""
+            SELECT ja FROM JobApplication ja
+            LEFT JOIN FETCH ja.job j
+            LEFT JOIN FETCH j.skills
+            WHERE ja.deleted = false
+              AND (ja.appliedAt IS NULL OR ja.appliedAt >= :since)
+            """)
+    List<JobApplication> findAllActiveSince(@Param("since") Instant since);
 }

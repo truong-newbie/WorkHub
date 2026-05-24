@@ -89,6 +89,18 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     @Query("""
             SELECT DISTINCT j FROM Job j
+            LEFT JOIN FETCH j.company
+            LEFT JOIN FETCH j.skills
+            WHERE j.id = :id
+              AND j.published = true
+              AND j.deleted = false
+              AND (j.company IS NULL OR j.company.active = true)
+              AND (j.expiredAt IS NULL OR j.expiredAt > :now)
+            """)
+    Optional<Job> findAvailablePublishedJobById(@Param("id") Long id, @Param("now") Instant now);
+
+    @Query("""
+            SELECT DISTINCT j FROM Job j
             JOIN j.skills sk
             WHERE j.published = true
               AND j.deleted = false

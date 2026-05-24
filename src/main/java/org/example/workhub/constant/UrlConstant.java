@@ -115,6 +115,16 @@ public class UrlConstant {
     }
   }
 
+  public static class JobBehavior{
+    public static final String TRACK_VIEW = "/candidate/jobs/{jobId}/view";
+    public static final String TRACK_CLICK = "/candidate/jobs/{jobId}/click";
+    public static final String TRACK_SEARCH = "/candidate/jobs/search-track";
+    public static final String BEHAVIOR_SUMMARY = "/candidate/recommendation/behavior-summary";
+
+    private JobBehavior() {
+    }
+  }
+
   public static class CandidateJobPreference{
     public static final String ONBOARDING_STATUS = "/candidate/onboarding-status";
     public static final String JOB_PREFERENCE = "/candidate/job-preference";
