@@ -18,6 +18,9 @@ public class EmailQueue extends DateAuditing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "event_id", unique = true, length = 36)
+    private String eventId;
+
     @Column(name = "to_email", nullable = false)
     private String toEmail;
 

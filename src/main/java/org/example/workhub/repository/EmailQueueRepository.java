@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmailQueueRepository extends JpaRepository<EmailQueue, Long> {
@@ -31,4 +32,6 @@ public interface EmailQueueRepository extends JpaRepository<EmailQueue, Long> {
     );
 
     boolean existsBySubscriberIdAndStatusIn(Long subscriberId, Collection<EmailQueueStatus> statuses);
+
+    Optional<EmailQueue> findByEventId(String eventId);
 }

@@ -3,6 +3,7 @@ package org.example.workhub.service;
 import org.example.workhub.domain.dto.request.ApplicationStatusRequest;
 import org.example.workhub.domain.dto.request.JobApplicationRequest;
 import org.example.workhub.domain.dto.pagination.PaginationResponseDto;
+import org.example.workhub.domain.dto.response.AtsScreeningQueuedResponse;
 import org.example.workhub.domain.dto.response.JobApplicationResponse;
 
 public interface JobApplicationService {
@@ -20,6 +21,8 @@ public interface JobApplicationService {
     PaginationResponseDto<JobApplicationResponse> getCompanyApplications(Long companyId, int page, int size);
 
     JobApplicationResponse updateApplicationStatus(Long applicationId, ApplicationStatusRequest request);
+
+    AtsScreeningQueuedResponse queueAtsScreening(Long applicationId);
 
     // ========== Internal ==========
     boolean hasApplied(Long jobId, String userId);

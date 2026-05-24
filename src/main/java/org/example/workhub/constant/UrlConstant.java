@@ -91,6 +91,7 @@ public class UrlConstant {
     public static final String JOB_APPLICATIONS = PRE_FIX + "/{jobId}/applications";
     public static final String MY_APPLICATIONS = "/applications/me";
     public static final String UPDATE_STATUS = "/applications/{applicationId}/status";
+    public static final String ATS_SCREEN = "/recruiter/applications/{applicationId}/screen";
 
     private JobApplication() {
     }
