@@ -1,4 +1,4 @@
-package org.example.workhub.search.dto.response;
+package org.example.workhub.domain.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

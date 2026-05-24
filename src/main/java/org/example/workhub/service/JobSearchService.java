@@ -1,10 +1,10 @@
-package org.example.workhub.search.service;
+package org.example.workhub.service;
 
 import org.example.workhub.domain.dto.pagination.PaginationResponseDto;
-import org.example.workhub.search.dto.request.JobSearchRequest;
-import org.example.workhub.search.dto.response.JobSearchResponse;
-import org.example.workhub.search.dto.response.JobSuggestionResponse;
-import org.example.workhub.search.dto.response.SearchReindexResponse;
+import org.example.workhub.domain.dto.request.JobSearchRequest;
+import org.example.workhub.domain.dto.response.JobSearchResponse;
+import org.example.workhub.domain.dto.response.JobSuggestionResponse;
+import org.example.workhub.domain.dto.response.SearchReindexResponse;
 
 import java.util.List;
 

@@ -20,7 +20,7 @@ import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.SkillRepository;
-import org.example.workhub.search.event.SkillChangedEvent;
+import org.example.workhub.event.SkillChangedEvent;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.SkillService;
 import org.springframework.context.ApplicationEventPublisher;

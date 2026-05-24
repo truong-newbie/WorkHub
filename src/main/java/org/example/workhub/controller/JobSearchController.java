@@ -1,12 +1,12 @@
-package org.example.workhub.search.controller;
+package org.example.workhub.controller;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.workhub.base.RestApiV1;
 import org.example.workhub.base.VsResponseUtil;
-import org.example.workhub.search.dto.request.JobSearchRequest;
-import org.example.workhub.search.service.JobSearchService;
+import org.example.workhub.domain.dto.request.JobSearchRequest;
+import org.example.workhub.service.JobSearchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;

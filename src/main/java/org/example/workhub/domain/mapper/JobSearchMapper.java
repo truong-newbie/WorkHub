@@ -1,10 +1,10 @@
-package org.example.workhub.search.mapper;
+package org.example.workhub.domain.mapper;
 
 import org.example.workhub.domain.entity.Company;
 import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.Skill;
-import org.example.workhub.search.document.JobSearchDocument;
-import org.example.workhub.search.dto.response.JobSearchResponse;
+import org.example.workhub.domain.document.JobSearchDocument;
+import org.example.workhub.domain.dto.response.JobSearchResponse;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Component;
 

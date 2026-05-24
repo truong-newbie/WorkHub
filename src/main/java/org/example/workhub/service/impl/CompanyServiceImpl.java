@@ -27,7 +27,7 @@ import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.CompanyRepository;
 import org.example.workhub.repository.JobRepository;
 import org.example.workhub.repository.UserRepository;
-import org.example.workhub.search.event.CompanyChangedEvent;
+import org.example.workhub.event.CompanyChangedEvent;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.CompanyService;
 import org.example.workhub.util.UploadFileUtil;

@@ -1,4 +1,4 @@
-package org.example.workhub.search.document;
+package org.example.workhub.domain.document;
 
 import lombok.Getter;
 import lombok.Setter;

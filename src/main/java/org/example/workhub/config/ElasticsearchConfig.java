@@ -1,4 +1,4 @@
-package org.example.workhub.search.config;
+package org.example.workhub.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

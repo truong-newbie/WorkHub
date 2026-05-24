@@ -1,4 +1,4 @@
-package org.example.workhub.search.dto.request;
+package org.example.workhub.domain.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

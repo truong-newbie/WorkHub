@@ -1,11 +1,11 @@
-package org.example.workhub.search.event;
+package org.example.workhub.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class JobUnpublishedEvent {
+public class JobCreatedEvent {
 
     private Long jobId;
 }

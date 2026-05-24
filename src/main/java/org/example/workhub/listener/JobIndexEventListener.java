@@ -1,10 +1,10 @@
-package org.example.workhub.search.listener;
+package org.example.workhub.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.workhub.repository.JobRepository;
-import org.example.workhub.search.event.*;
-import org.example.workhub.search.service.JobSearchService;
+import org.example.workhub.event.*;
+import org.example.workhub.service.JobSearchService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
