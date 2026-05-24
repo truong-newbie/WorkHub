@@ -142,4 +142,9 @@ public class ErrorMessage {
     public static final String ERR_FORBIDDEN_ACCESS = "exception.notification.forbidden";
   }
 
+  public static class Search {
+    public static final String ERR_ENGINE_UNAVAILABLE = "exception.search.engine.unavailable";
+    public static final String ERR_REINDEX_FAILED = "exception.search.reindex.failed";
+  }
+
 }

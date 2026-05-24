@@ -20,8 +20,10 @@ import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.SkillRepository;
+import org.example.workhub.event.SkillChangedEvent;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.SkillService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class SkillServiceImpl implements SkillService {
 
     SkillRepository skillRepository;
     SkillMapper skillMapper;
+    ApplicationEventPublisher eventPublisher;
 
     @Override
     public SkillResponseDto create(SkillRequestDto request) {
@@ -73,7 +76,9 @@ public class SkillServiceImpl implements SkillService {
         if (request.getActive() != null) {
             skill.setActive(request.getActive());
         }
-        return skillMapper.toDto(skillRepository.save(skill));
+        Skill saved = skillRepository.save(skill);
+        eventPublisher.publishEvent(new SkillChangedEvent(saved.getId()));
+        return skillMapper.toDto(saved);
     }
 
     @Override
@@ -112,7 +117,9 @@ public class SkillServiceImpl implements SkillService {
             throw new BadRequestException(ErrorMessage.Skill.ERR_ALREADY_ENABLED);
         }
         skill.setActive(true);
-        return skillMapper.toDto(skillRepository.save(skill));
+        Skill saved = skillRepository.save(skill);
+        eventPublisher.publishEvent(new SkillChangedEvent(saved.getId()));
+        return skillMapper.toDto(saved);
     }
 
     @Override
@@ -122,7 +129,9 @@ public class SkillServiceImpl implements SkillService {
             throw new BadRequestException(ErrorMessage.Skill.ERR_ALREADY_DISABLED);
         }
         skill.setActive(false);
-        return skillMapper.toDto(skillRepository.save(skill));
+        Skill saved = skillRepository.save(skill);
+        eventPublisher.publishEvent(new SkillChangedEvent(saved.getId()));
+        return skillMapper.toDto(saved);
     }
 
     @Override
@@ -153,6 +162,7 @@ public class SkillServiceImpl implements SkillService {
         skill.setDeleted(true);
         skill.setActive(false);
         skillRepository.save(skill);
+        eventPublisher.publishEvent(new SkillChangedEvent(skill.getId()));
     }
 
     private Skill findByIdNotDeleted(Long id) {
