@@ -27,6 +27,7 @@ import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.CompanyRepository;
 import org.example.workhub.repository.JobRepository;
 import org.example.workhub.repository.UserRepository;
+import org.example.workhub.search.event.CompanyChangedEvent;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.CompanyService;
 import org.example.workhub.util.UploadFileUtil;
@@ -114,6 +115,7 @@ public class CompanyServiceImpl implements CompanyService {
             owner.setCompany(saved);
             userRepository.save(owner);
         }
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
         return companyMapper.toDto(saved);
     }
 
@@ -129,7 +131,9 @@ public class CompanyServiceImpl implements CompanyService {
         if (request.getActive() != null && isAdmin(currentUser)) {
             company.setActive(request.getActive());
         }
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -140,7 +144,9 @@ public class CompanyServiceImpl implements CompanyService {
 
         applyRequest(company, request);
         company.setSlug(generateUniqueSlug(request.getName(), company.getId()));
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -151,7 +157,9 @@ public class CompanyServiceImpl implements CompanyService {
         validateCanManageCompany(company, currentUser);
 
         company.setLogo(uploadFileUtil.uploadFile(file));
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -162,14 +170,18 @@ public class CompanyServiceImpl implements CompanyService {
         validateCanManageCompany(company, currentUser);
 
         company.setCoverImage(uploadFileUtil.uploadFile(file));
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
     public CompanyResponseDto enable(Long id) {
         Company company = getCompanyOrThrow(id);
         company.setActive(true);
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -179,7 +191,9 @@ public class CompanyServiceImpl implements CompanyService {
             throw new BadRequestException(ErrorMessage.Company.ERR_ALREADY_DISABLED);
         }
         company.setActive(false);
-        return companyMapper.toDto(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
+        return companyMapper.toDto(saved);
     }
 
     @Override
@@ -199,6 +213,7 @@ public class CompanyServiceImpl implements CompanyService {
                 saved.getId(),
                 true
         ));
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
         return companyMapper.toDto(saved);
     }
 
@@ -215,6 +230,7 @@ public class CompanyServiceImpl implements CompanyService {
                 saved.getId(),
                 false
         ));
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
         return companyMapper.toDto(saved);
     }
 
@@ -263,7 +279,8 @@ public class CompanyServiceImpl implements CompanyService {
 
         company.setDeleted(true);
         company.setActive(false);
-        companyRepository.save(company);
+        Company saved = companyRepository.save(company);
+        eventPublisher.publishEvent(new CompanyChangedEvent(saved.getId()));
     }
 
     private Company getCompanyOrThrow(Long id) {

@@ -22,6 +22,29 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("SELECT j FROM Job j WHERE j.id = :id AND j.deleted = false")
     Optional<Job> findByIdNotDeleted(@Param("id") Long id);
 
+    @Query("""
+            SELECT DISTINCT j FROM Job j
+            LEFT JOIN FETCH j.company
+            LEFT JOIN FETCH j.skills
+            LEFT JOIN FETCH j.recruiter
+            WHERE j.id = :id
+            """)
+    Optional<Job> findByIdForSearch(@Param("id") Long id);
+
+    @Query("""
+            SELECT DISTINCT j FROM Job j
+            LEFT JOIN FETCH j.company
+            LEFT JOIN FETCH j.skills
+            LEFT JOIN FETCH j.recruiter
+            """)
+    List<Job> findAllForSearch();
+
+    @Query("SELECT j.id FROM Job j WHERE j.company.id = :companyId")
+    List<Long> findIdsByCompanyId(@Param("companyId") Long companyId);
+
+    @Query("SELECT DISTINCT j.id FROM Job j JOIN j.skills s WHERE s.id = :skillId")
+    List<Long> findIdsBySkillId(@Param("skillId") Long skillId);
+
     @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.deleted = false")
     List<Job> findByCompanyIdNotDeleted(@Param("companyId") Long companyId);
 

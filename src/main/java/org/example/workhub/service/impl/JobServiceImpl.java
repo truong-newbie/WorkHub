@@ -26,8 +26,14 @@ import org.example.workhub.repository.JobApplicationRepository;
 import org.example.workhub.repository.JobRepository;
 import org.example.workhub.repository.SkillRepository;
 import org.example.workhub.repository.UserRepository;
+import org.example.workhub.search.event.JobCreatedEvent;
+import org.example.workhub.search.event.JobDeletedEvent;
+import org.example.workhub.search.event.JobPublishedEvent;
+import org.example.workhub.search.event.JobUnpublishedEvent;
+import org.example.workhub.search.event.JobUpdatedEvent;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.JobService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +64,7 @@ public class JobServiceImpl implements JobService {
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
     private final JobMapper jobMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ========== CRUD ==========
 
@@ -104,6 +111,7 @@ public class JobServiceImpl implements JobService {
         job.setSlug(generateSlug(request.getTitle()));
 
         Job savedJob = jobRepository.save(job);
+        eventPublisher.publishEvent(new JobCreatedEvent(savedJob.getId()));
         return jobMapper.toResponse(savedJob);
     }
 
@@ -146,6 +154,7 @@ public class JobServiceImpl implements JobService {
         }
 
         Job updatedJob = jobRepository.save(job);
+        eventPublisher.publishEvent(new JobUpdatedEvent(updatedJob.getId()));
         return jobMapper.toResponse(updatedJob);
     }
 
@@ -199,6 +208,7 @@ public class JobServiceImpl implements JobService {
         job.setDeleted(true);
         job.setPublished(false);
         jobRepository.save(job);
+        eventPublisher.publishEvent(new JobDeletedEvent(job.getId()));
     }
 
     // ========== Publish/Unpublish ==========
@@ -211,6 +221,7 @@ public class JobServiceImpl implements JobService {
 
         job.setPublished(true);
         Job updatedJob = jobRepository.save(job);
+        eventPublisher.publishEvent(new JobPublishedEvent(updatedJob.getId()));
         return jobMapper.toResponse(updatedJob);
     }
 
@@ -222,6 +233,7 @@ public class JobServiceImpl implements JobService {
 
         job.setPublished(false);
         Job updatedJob = jobRepository.save(job);
+        eventPublisher.publishEvent(new JobUnpublishedEvent(updatedJob.getId()));
         return jobMapper.toResponse(updatedJob);
     }
 

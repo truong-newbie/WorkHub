@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "WorkHub Elasticsearch Job Search",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "job_id",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Search Jobs",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/jobs/search?keyword=jav%20develper&pageNum=1&pageSize=10"
+      }
+    },
+    {
+      "name": "Autocomplete",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/jobs/search/autocomplete?keyword=jav&limit=10"
+      }
+    },
+    {
+      "name": "Reindex Jobs",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/jobs/search/reindex"
+      }
+    },
+    {
+      "name": "Create Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Java Developer\",\n  \"description\": \"Build backend services\",\n  \"requirement\": \"Java, Spring Boot, MySQL\",\n  \"benefit\": \"Remote friendly\",\n  \"location\": \"Ha Noi\",\n  \"salaryMin\": \"1000\",\n  \"salaryMax\": \"2500\",\n  \"negotiableSalary\": false,\n  \"level\": \"MIDDLE\",\n  \"employmentType\": \"FULL_TIME\",\n  \"experienceYears\": 2,\n  \"quantity\": 1,\n  \"published\": false,\n  \"skillIds\": [1]\n}"
+        },
+        "url": "{{base_url}}/job"
+      }
+    },
+    {
+      "name": "Publish Job",
+      "request": {
+        "method": "PUT",
+        "url": "{{base_url}}/job/{{job_id}}/publish"
+      }
+    },
+    {
+      "name": "Update Job",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Senior Java Developer\"\n}"
+        },
+        "url": "{{base_url}}/job/{{job_id}}"
+      }
+    },
+    {
+      "name": "Delete Job",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/job/{{job_id}}"
+      }
+    }
+  ]
+}
