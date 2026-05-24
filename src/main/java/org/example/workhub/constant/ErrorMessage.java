@@ -153,4 +153,10 @@ public class ErrorMessage {
     public static final String ERR_INVALID_WEIGHT_CONFIG = "exception.recommendation.invalid.weight.config";
   }
 
+  public static class Queue {
+    public static final String ERR_PUBLISH_FAILED = "exception.queue.publish.failed";
+    public static final String ERR_JOB_NOT_FOUND = "exception.queue.job.not.found";
+    public static final String ERR_INVALID_MESSAGE = "exception.queue.invalid.message";
+  }
+
 }

@@ -25,6 +25,8 @@ import org.example.workhub.repository.JobRepository;
 import org.example.workhub.repository.ResumeRepository;
 import org.example.workhub.repository.SkillRepository;
 import org.example.workhub.repository.UserRepository;
+import org.example.workhub.queue.message.ResumeParsingJobMessage;
+import org.example.workhub.queue.producer.BackgroundJobProducer;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.ResumeService;
 import org.example.workhub.util.UploadFileUtil;
@@ -44,6 +46,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -68,6 +71,7 @@ public class ResumeServiceImpl implements ResumeService {
     private final JobApplicationRepository jobApplicationRepository;
     private final ResumeMapper resumeMapper;
     private final UploadFileUtil uploadFileUtil;
+    private final BackgroundJobProducer backgroundJobProducer;
 
     @Override
     public ResumeResponse uploadResume(ResumeUploadRequest request) {
@@ -102,6 +106,7 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setSkills(resolveSkills(request.getSkillIds()));
 
         Resume saved = resumeRepository.save(resume);
+        publishResumeParsingJob(saved);
         return resumeMapper.toResponse(saved);
     }
 
@@ -157,7 +162,9 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setParsedContent(null);
         resume.setAtsScore(null);
 
-        return resumeMapper.toResponse(resumeRepository.save(resume));
+        Resume saved = resumeRepository.save(resume);
+        publishResumeParsingJob(saved);
+        return resumeMapper.toResponse(saved);
     }
 
     @Override
@@ -392,5 +399,19 @@ public class ResumeServiceImpl implements ResumeService {
                 request.getSortDir() == null ? "DESC" : request.getSortDir()
         );
         return new PaginationResponseDto<>(pagingMeta, resumeMapper.toResponses(page.getContent()));
+    }
+
+    private void publishResumeParsingJob(Resume resume) {
+        try {
+            backgroundJobProducer.publishResumeParsingJob(ResumeParsingJobMessage.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .resumeId(resume.getId())
+                    .fileUrl(resume.getFileUrl())
+                    .userId(resume.getUser() != null ? resume.getUser().getId() : null)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        } catch (RuntimeException ex) {
+            log.error("Failed to publish resume parsing job resumeId={}", resume.getId(), ex);
+        }
     }
 }

@@ -9,10 +9,12 @@ import org.example.workhub.domain.dto.pagination.PagingMeta;
 import org.example.workhub.domain.dto.pagination.PaginationResponseDto;
 import org.example.workhub.domain.dto.request.ApplicationStatusRequest;
 import org.example.workhub.domain.dto.request.JobApplicationRequest;
+import org.example.workhub.domain.dto.response.AtsScreeningQueuedResponse;
 import org.example.workhub.domain.dto.response.JobApplicationResponse;
 import org.example.workhub.domain.entity.Company;
 import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.JobApplication;
+import org.example.workhub.domain.entity.Resume;
 import org.example.workhub.domain.entity.User;
 import org.example.workhub.domain.mapper.JobApplicationMapper;
 import org.example.workhub.event.JobApplicationCreatedEvent;
@@ -24,7 +26,10 @@ import org.example.workhub.exception.NotFoundException;
 import org.example.workhub.repository.CompanyRepository;
 import org.example.workhub.repository.JobApplicationRepository;
 import org.example.workhub.repository.JobRepository;
+import org.example.workhub.repository.ResumeRepository;
 import org.example.workhub.repository.UserRepository;
+import org.example.workhub.queue.message.AtsScreeningJobMessage;
+import org.example.workhub.queue.producer.BackgroundJobProducer;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.JobApplicationService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -37,6 +42,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -47,8 +54,10 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private final JobApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final ResumeRepository resumeRepository;
     private final JobApplicationMapper applicationMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final BackgroundJobProducer backgroundJobProducer;
 
     // ========== Candidate Actions ==========
 
@@ -202,8 +211,8 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             throw new BadRequestException(ErrorMessage.INVALID_SOME_THING_FIELD);
         }
 
-        // Only allow REVIEWING, APPROVED, REJECTED
-        if (newStatus == StatusEnum.PENDING) {
+        // Only recruiter review actions are allowed through this endpoint.
+        if (newStatus != StatusEnum.REVIEWING && newStatus != StatusEnum.APPROVED && newStatus != StatusEnum.REJECTED) {
             throw new BadRequestException(ErrorMessage.INVALID_SOME_THING_FIELD);
         }
 
@@ -221,6 +230,37 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 updated.getId()
         ));
         return applicationMapper.toResponse(updated);
+    }
+
+    @Override
+    public AtsScreeningQueuedResponse queueAtsScreening(Long applicationId) {
+        UserPrincipal currentUser = getCurrentUserPrincipal();
+        JobApplication application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.Application.ERR_NOT_FOUND_ID));
+        validateJobAccess(application.getJob(), currentUser);
+
+        Resume resume = resumeRepository.findShareableByCandidateId(application.getUser().getId()).stream()
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.Resume.ERR_NOT_FOUND));
+
+        AtsScreeningJobMessage message = AtsScreeningJobMessage.builder()
+                .eventId(UUID.randomUUID().toString())
+                .applicationId(application.getId())
+                .resumeId(resume.getId())
+                .jobId(application.getJob().getId())
+                .requestedByUserId(currentUser.getId())
+                .createdAt(LocalDateTime.now())
+                .build();
+        backgroundJobProducer.publishAtsScreeningJob(message);
+
+        return AtsScreeningQueuedResponse.builder()
+                .applicationId(application.getId())
+                .resumeId(resume.getId())
+                .jobId(application.getJob().getId())
+                .screeningStatus("PROCESSING")
+                .message("ATS screening job has been queued")
+                .eventId(message.getEventId())
+                .build();
     }
 
     @Override

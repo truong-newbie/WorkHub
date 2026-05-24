@@ -4,5 +4,6 @@ public enum EmailQueueStatus {
     PENDING,
     PROCESSING,
     SENT,
-    FAILED
+    FAILED,
+    DEAD_LETTER
 }

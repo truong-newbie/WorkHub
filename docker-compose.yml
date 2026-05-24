@@ -30,6 +30,19 @@ services:
     networks:
       - default
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: workhub-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - default
+
   backend-service:
     container_name: backend-service
     build:
@@ -39,9 +52,14 @@ services:
       - "8080:8080"
     environment:
       - ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
     depends_on:
       - mysql
       - elasticsearch
+      - rabbitmq
     networks:
       - default
 

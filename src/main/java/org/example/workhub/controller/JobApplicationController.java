@@ -107,4 +107,17 @@ public class JobApplicationController {
             @RequestBody @Valid ApplicationStatusRequest request) {
         return VsResponseUtil.success(applicationService.updateApplicationStatus(applicationId, request));
     }
+
+    @Operation(summary = "Queue ATS screening", description = "Queue async ATS resume screening for an application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "ATS screening queued"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Application not found")
+    })
+    @PostMapping(UrlConstant.JobApplication.ATS_SCREEN)
+    @PreAuthorize("hasRole('RECRUITER') or hasRole('ADMIN')")
+    public ResponseEntity<?> queueAtsScreening(
+            @PathVariable @Parameter(description = "Application ID") Long applicationId) {
+        return VsResponseUtil.success(applicationService.queueAtsScreening(applicationId));
+    }
 }

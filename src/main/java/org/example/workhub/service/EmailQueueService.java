@@ -3,6 +3,7 @@ package org.example.workhub.service;
 import org.example.workhub.domain.dto.response.EmailQueueProcessResponse;
 import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.Subscriber;
+import org.example.workhub.queue.message.EmailJobMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,4 +20,6 @@ public interface EmailQueueService {
     );
 
     EmailQueueProcessResponse processPendingEmails();
+
+    void processEmailJob(EmailJobMessage message);
 }
