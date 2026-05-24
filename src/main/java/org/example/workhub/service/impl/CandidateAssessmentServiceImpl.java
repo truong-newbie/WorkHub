@@ -16,6 +16,7 @@ import org.example.workhub.domain.mapper.AssessmentQuestionMapper;
 import org.example.workhub.domain.mapper.AssessmentTestMapper;
 import org.example.workhub.domain.mapper.CandidateAnswerMapper;
 import org.example.workhub.domain.mapper.CandidateTestAssignmentMapper;
+import org.example.workhub.event.AssessmentSubmittedEvent;
 import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.ForbiddenException;
@@ -26,6 +27,7 @@ import org.example.workhub.repository.CandidateAnswerRepository;
 import org.example.workhub.repository.CandidateTestAssignmentRepository;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.CandidateAssessmentService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,7 @@ public class CandidateAssessmentServiceImpl implements CandidateAssessmentServic
     private final AssessmentQuestionMapper assessmentQuestionMapper;
     private final CandidateAnswerMapper answerMapper;
     private final AssessmentSecuritySupport securitySupport;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -126,6 +129,13 @@ public class CandidateAssessmentServiceImpl implements CandidateAssessmentServic
         assignment.setMaxScore(calculateMaxScore(test));
         assignment.setTotalScore(calculateCurrentScore(assignment.getId()));
         CandidateTestAssignment saved = assignmentRepository.save(assignment);
+        eventPublisher.publishEvent(new AssessmentSubmittedEvent(
+                test.getRecruiter(),
+                saved.getCandidate(),
+                resolveUserDisplayName(saved.getCandidate()),
+                test.getJob() != null ? test.getJob().getTitle() : "this job",
+                saved.getId()
+        ));
         return assignmentMapper.toResult(saved, answerRepository.findByAssignmentId(saved.getId()), answerMapper);
     }
 
@@ -198,5 +208,15 @@ public class CandidateAssessmentServiceImpl implements CandidateAssessmentServic
                 .filter(answer -> answer.getScore() != null)
                 .mapToDouble(CandidateAnswer::getScore)
                 .sum();
+    }
+
+    private String resolveUserDisplayName(User user) {
+        if (user == null) {
+            return "Candidate";
+        }
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return user.getUsername();
+        }
+        return user.getEmail() != null ? user.getEmail() : "Candidate";
     }
 }

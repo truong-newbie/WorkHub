@@ -15,6 +15,8 @@ import org.example.workhub.domain.entity.Job;
 import org.example.workhub.domain.entity.JobApplication;
 import org.example.workhub.domain.entity.User;
 import org.example.workhub.domain.mapper.JobApplicationMapper;
+import org.example.workhub.event.JobApplicationCreatedEvent;
+import org.example.workhub.event.JobApplicationStatusUpdatedEvent;
 import org.example.workhub.exception.BadRequestException;
 import org.example.workhub.exception.ConflictException;
 import org.example.workhub.exception.ForbiddenException;
@@ -25,6 +27,7 @@ import org.example.workhub.repository.JobRepository;
 import org.example.workhub.repository.UserRepository;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.JobApplicationService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +48,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final JobApplicationMapper applicationMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ========== Candidate Actions ==========
 
@@ -85,6 +89,14 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         application.setAppliedAt(Instant.now());
 
         JobApplication saved = applicationRepository.save(application);
+        eventPublisher.publishEvent(new JobApplicationCreatedEvent(
+                resolveJobNotificationRecipient(job),
+                user,
+                resolveUserDisplayName(user),
+                job.getTitle(),
+                job.getId(),
+                saved.getId()
+        ));
         return applicationMapper.toResponse(saved);
     }
 
@@ -174,6 +186,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     @Override
     public JobApplicationResponse updateApplicationStatus(Long applicationId, ApplicationStatusRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
+        User reviewer = getUserFromPrincipal(currentUser);
 
         JobApplication application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.Application.ERR_NOT_FOUND_ID));
@@ -200,6 +213,13 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         application.setReviewNote(request.getReviewNote());
 
         JobApplication updated = applicationRepository.save(application);
+        eventPublisher.publishEvent(new JobApplicationStatusUpdatedEvent(
+                application.getUser(),
+                reviewer,
+                application.getJob() != null ? application.getJob().getTitle() : "this job",
+                newStatus,
+                updated.getId()
+        ));
         return applicationMapper.toResponse(updated);
     }
 
@@ -243,5 +263,25 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         return currentUser.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals(RoleConstant.ADMIN) ||
                         a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    private User resolveJobNotificationRecipient(Job job) {
+        if (job.getRecruiter() != null) {
+            return job.getRecruiter();
+        }
+        if (job.getCompany() != null && job.getCompany().getOwner() != null) {
+            return job.getCompany().getOwner();
+        }
+        return null;
+    }
+
+    private String resolveUserDisplayName(User user) {
+        if (user == null) {
+            return "Candidate";
+        }
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return user.getUsername();
+        }
+        return user.getEmail() != null ? user.getEmail() : "Candidate";
     }
 }

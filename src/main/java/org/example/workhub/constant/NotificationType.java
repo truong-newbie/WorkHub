@@ -1,0 +1,12 @@
+package org.example.workhub.constant;
+
+public enum NotificationType {
+    JOB_APPLICATION_CREATED,
+    JOB_APPLICATION_STATUS_UPDATED,
+    ASSESSMENT_ASSIGNED,
+    ASSESSMENT_SUBMITTED,
+    COMPANY_APPROVED,
+    COMPANY_REJECTED,
+    ATS_SCREENING_COMPLETED,
+    SYSTEM
+}

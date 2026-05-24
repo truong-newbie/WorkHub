@@ -137,4 +137,9 @@ public class ErrorMessage {
     public static final String ERR_DUPLICATE_ANSWER = "exception.assessment.duplicate.answer";
   }
 
+  public static class Notification {
+    public static final String ERR_NOT_FOUND_ID = "exception.notification.not.found.id";
+    public static final String ERR_FORBIDDEN_ACCESS = "exception.notification.forbidden";
+  }
+
 }
