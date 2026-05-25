@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Handles user profile, admin user management, role changes, account lock/unlock, avatar upload, and statistics.
+Handles user profile, admin user management, role changes, account lock/unlock, Cloudinary avatar upload, and statistics.
 
 ## Main Files
 
@@ -22,6 +22,17 @@ Handles user profile, admin user management, role changes, account lock/unlock, 
 - Current profile APIs require authentication.
 - Admin management requires admin role.
 - Service layer validates user existence and deleted status.
+
+## Avatar Upload
+
+`PUT /api/v1/user/me/avatar` consumes `multipart/form-data`.
+
+Accepted part names:
+
+- `avatar`
+- `file`
+
+The backend validates that the uploaded part is an image, uploads it to Cloudinary under `workhub/avatars`, uses the current user's UUID as Cloudinary `public_id`, stores the returned `secure_url` in `users.avatar`, and returns `UserResponse`.
 
 ## AI Notes
 

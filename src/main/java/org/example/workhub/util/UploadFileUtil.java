@@ -39,6 +39,21 @@ public class UploadFileUtil {
     }
   }
 
+  public String uploadImage(MultipartFile file, String folder, String publicId) {
+    try {
+      Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+          "resource_type", "image",
+          "folder", folder,
+          "public_id", publicId,
+          "overwrite", true,
+          "invalidate", true
+      ));
+      return result.get("secure_url").toString();
+    } catch (IOException e) {
+      throw new UploadFileException(ErrorMessage.Resume.ERR_UPLOAD_FAILED);
+    }
+  }
+
   public void destroyFileWithUrl(String url) {
     int startIndex = url.lastIndexOf("/") + 1;
     int endIndex = url.lastIndexOf(".");
