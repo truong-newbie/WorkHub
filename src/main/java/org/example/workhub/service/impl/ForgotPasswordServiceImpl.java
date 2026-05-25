@@ -50,6 +50,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .user(user)
                 .build();
 
+        forgotPasswordRepository.deleteByUser(user);
         emailService.sendSimpleMessage(mailBody);
         forgotPasswordRepository.save(fp);
         return new CommonResponseDto(true, "Email sent for verification");
@@ -80,6 +81,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
             throw new BadRequestException(ErrorMessage.INVALID_REPEAT_PASSWORD);
         }
         userRepository.updatePassword(email , passwordEncoder.encode(changePassword.password()));
+        userRepository.findByEmail(email).ifPresent(forgotPasswordRepository::deleteByUser);
     }
 
     private Integer otpGenerator(){

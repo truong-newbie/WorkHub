@@ -173,18 +173,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUserProfile() {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
         return userMapper.toUserResponse(user);
     }
 
     @Override
     public UserResponse updateCurrentUserProfile(UserProfileUpdateRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
         // Validate username unique (excluding current user)
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
@@ -201,9 +197,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(ChangePasswordRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
         // Verify current password
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -223,9 +217,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse uploadAvatar(String avatarUrl) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
         user.setAvatar(avatarUrl);
         User updatedUser = userRepository.save(user);
