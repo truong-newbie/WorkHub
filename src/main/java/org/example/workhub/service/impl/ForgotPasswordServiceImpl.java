@@ -17,6 +17,7 @@ import org.example.workhub.service.EmailService;
 import org.example.workhub.service.ForgotPasswordService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
@@ -33,6 +34,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public CommonResponseDto verifyEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()-> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_EMAIL));
@@ -50,7 +52,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .user(user)
                 .build();
 
+        // Delete old OTP records for this user
         forgotPasswordRepository.deleteByUser(user);
+
         emailService.sendSimpleMessage(mailBody);
         forgotPasswordRepository.save(fp);
         return new CommonResponseDto(true, "Email sent for verification");
@@ -58,6 +62,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     }
 
     @Override
+    @Transactional
     public void verifyOtp(Integer otp, String email) {
 
         User user = userRepository.findByEmail(email)
@@ -76,12 +81,13 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     }
 
     @Override
+    @Transactional
     public void changePassword(ChangePassword changePassword , String email) {
         if(!Objects.equals(changePassword.password() , changePassword.repeatPassword())){
             throw new BadRequestException(ErrorMessage.INVALID_REPEAT_PASSWORD);
         }
         userRepository.updatePassword(email , passwordEncoder.encode(changePassword.password()));
-        userRepository.findByEmail(email).ifPresent(forgotPasswordRepository::deleteByUser);
+        userRepository.findByEmail(email).ifPresent(user -> forgotPasswordRepository.deleteByUser(user));
     }
 
     private Integer otpGenerator(){
