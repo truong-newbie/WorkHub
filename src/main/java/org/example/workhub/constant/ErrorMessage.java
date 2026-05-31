@@ -159,4 +159,13 @@ public class ErrorMessage {
     public static final String ERR_INVALID_MESSAGE = "exception.queue.invalid.message";
   }
 
+  public static class RecruiterRequest {
+    public static final String ERR_NOT_FOUND = "recruiter.request.not.found";
+    public static final String ERR_PENDING_EXISTS = "recruiter.request.pending.exists";
+    public static final String ERR_ONLY_CANDIDATE = "recruiter.request.only.candidate";
+    public static final String ERR_ALREADY_RECRUITER = "recruiter.request.already.recruiter";
+    public static final String ERR_NOT_PENDING = "recruiter.request.not.pending";
+    public static final String ERR_CANDIDATE_NOT_ELIGIBLE = "recruiter.request.candidate.not.eligible";
+  }
+
 }

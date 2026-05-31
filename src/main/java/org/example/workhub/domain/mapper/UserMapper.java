@@ -23,7 +23,7 @@ public interface UserMapper {
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "providerId", ignore = true)
     @Mapping(target = "resumes", ignore = true)
-    @Mapping(target = "forgotPassword", ignore = true)
+    @Mapping(target = "forgotPasswords", ignore = true)
     User toUser(UserCreateRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -36,7 +36,7 @@ public interface UserMapper {
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "providerId", ignore = true)
     @Mapping(target = "resumes", ignore = true)
-    @Mapping(target = "forgotPassword", ignore = true)
+    @Mapping(target = "forgotPasswords", ignore = true)
     void updateUserFromRequest(UserUpdateRequest request, @MappingTarget User user);
 
     @Mapping(target = "id", ignore = true)
@@ -50,7 +50,7 @@ public interface UserMapper {
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "providerId", ignore = true)
     @Mapping(target = "resumes", ignore = true)
-    @Mapping(target = "forgotPassword", ignore = true)
+    @Mapping(target = "forgotPasswords", ignore = true)
     void updateProfileFromRequest(UserProfileUpdateRequest request, @MappingTarget User user);
 
     @Mappings({

@@ -69,8 +69,9 @@ public class User extends DateAuditing implements Serializable {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToOne(mappedBy = "user")
-    private ForgotPassword forgotPassword;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ForgotPassword> forgotPasswords;
 
     // === Additional fields for recruitment system ===
     @Column(name = "enabled")

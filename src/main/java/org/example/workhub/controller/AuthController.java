@@ -19,8 +19,10 @@ import org.example.workhub.domain.dto.request.RegisterRequestDto;
 import org.example.workhub.domain.dto.response.LoginResponseDto;
 import org.example.workhub.domain.dto.response.RegisterResponseDto;
 import org.example.workhub.service.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,6 +43,10 @@ import java.util.Objects;
 @RestApiV1
 public class AuthController {
     AuthService authService;
+
+    @Value("${auth.oauth2.frontend-callback-url:http://localhost:5173/auth/oauth/callback}")
+    @lombok.experimental.NonFinal
+    String oauth2FrontendCallbackUrl;
 
     @Operation(summary = "API Đăng ký tài khoản")
     @PostMapping(UrlConstant.Auth.REGISTER)
@@ -108,7 +117,7 @@ public class AuthController {
         Map<String, Object> userInfo = authService.authenticateAndFetchProfile(code, loginType);
 
         if (userInfo == null) {
-            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, "Failed to authenticate");
+            return redirectToFrontendError("oauth_failed");
         }
 
         String accountId = "";
@@ -157,9 +166,41 @@ public class AuthController {
         }
         LoginResponseDto response = authService.socialLogin(loginRequestDto, request);
 
-        return VsResponseUtil.success(response);
+        return redirectToFrontend(response);
     }
 
+    private ResponseEntity<Void> redirectToFrontend(LoginResponseDto response) {
+        String role = response.getAuthorities() == null ? "" : response.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("");
+        String redirectUrl = oauth2FrontendCallbackUrl
+                + separator(oauth2FrontendCallbackUrl)
+                + "accessToken=" + encode(response.getAccessToken())
+                + "&refreshToken=" + encode(response.getRefreshToken())
+                + "&userId=" + encode(response.getId())
+                + "&role=" + encode(role);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl))
+                .build();
+    }
+
+    private ResponseEntity<Void> redirectToFrontendError(String errorCode) {
+        String redirectUrl = oauth2FrontendCallbackUrl
+                + separator(oauth2FrontendCallbackUrl)
+                + "error=" + encode(errorCode);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl))
+                .build();
+    }
+
+    private String separator(String url) {
+        return url.contains("?") ? "&" : "?";
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
+    }
 
 
 

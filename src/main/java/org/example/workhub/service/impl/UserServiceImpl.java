@@ -23,6 +23,7 @@ import org.example.workhub.repository.RoleRepository;
 import org.example.workhub.repository.UserRepository;
 import org.example.workhub.security.UserPrincipal;
 import org.example.workhub.service.UserService;
+import org.example.workhub.util.UploadFileUtil;
 import org.example.workhub.util.PaginationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -49,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final CompanyRepository companyRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UploadFileUtil uploadFileUtil;
 
     // ========== CRUD ==========
 
@@ -173,18 +176,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUserProfile() {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
         return userMapper.toUserResponse(user);
     }
 
     @Override
     public UserResponse updateCurrentUserProfile(UserProfileUpdateRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
         // Validate username unique (excluding current user)
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
@@ -201,9 +200,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(ChangePasswordRequest request) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
         // Verify current password
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -221,12 +218,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse uploadAvatar(String avatarUrl) {
+    public UserResponse uploadAvatar(MultipartFile avatar) {
+        validateAvatarFile(avatar);
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        User user = userRepository.findByUsernameAndDeletedFalse(currentUser.getUsername())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME,
-                        new String[]{currentUser.getUsername()}));
+        User user = findUserByIdNotDeleted(currentUser.getId());
 
+        String avatarUrl = uploadFileUtil.uploadImage(avatar, "workhub/avatars", user.getId());
         user.setAvatar(avatarUrl);
         User updatedUser = userRepository.save(user);
         return userMapper.toUserResponse(updatedUser);
@@ -390,5 +387,15 @@ public class UserServiceImpl implements UserService {
                 ? Sort.by(filter.getSortBy()).ascending()
                 : Sort.by(filter.getSortBy()).descending();
         return PageRequest.of(filter.getPage(), filter.getSize(), sort);
+    }
+
+    private void validateAvatarFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException(ErrorMessage.Company.ERR_FILE_EMPTY);
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BadRequestException(ErrorMessage.Company.ERR_FILE_INVALID);
+        }
     }
 }
