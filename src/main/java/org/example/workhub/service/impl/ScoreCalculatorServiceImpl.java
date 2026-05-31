@@ -12,6 +12,9 @@ public class ScoreCalculatorServiceImpl implements ScoreCalculatorService {
         if (response == null || response.getSkillScore() == null) {
             return 0D;
         }
+        if (response.getFinalScore() != null) {
+            return round(response.getFinalScore());
+        }
         Double semanticScore = response.getSemanticScore();
         if (semanticScore == null || semanticScore == 0D) {
             return round(response.getSkillScore());

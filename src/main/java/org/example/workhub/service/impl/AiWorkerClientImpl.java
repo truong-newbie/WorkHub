@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -32,12 +34,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AiWorkerClientImpl implements AiWorkerClient {
 
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(90);
     private static final List<String> COMMON_SKILLS = List.of(
             "Java", "Spring Boot", "Docker", "Redis", "MySQL", "PostgreSQL",
             "React", "Angular", "AWS", "Kafka", "Kubernetes", "Python"
     );
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createRestTemplate();
 
     @Value("${ai.worker.base-url:http://localhost:8000}")
     private String baseUrl;
@@ -52,9 +56,13 @@ public class AiWorkerClientImpl implements AiWorkerClient {
         }
 
         try {
-            byte[] fileBytes = URI.create(resume.getFileUrl()).toURL().openStream().readAllBytes();
+            byte[] fileBytes;
+            try (InputStream stream = URI.create(resume.getFileUrl()).toURL().openStream()) {
+                fileBytes = stream.readAllBytes();
+            }
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("job_description", jobDescription);
+            body.add("required_skills", String.join(",", jobSkills == null ? List.of() : jobSkills));
             body.add("file", new ByteArrayResource(fileBytes) {
                 @Override
                 public String getFilename() {
@@ -69,7 +77,11 @@ public class AiWorkerClientImpl implements AiWorkerClient {
                     new HttpEntity<>(body, headers),
                     AiResumeAnalysisResponse.class
             );
-            return response.getBody();
+            AiResumeAnalysisResponse result = response.getBody();
+            if (result == null) {
+                throw new InternalServerException(ErrorMessage.AiWorker.ERR_UNAVAILABLE);
+            }
+            return result;
         } catch (IOException | IllegalArgumentException | RestClientException ex) {
             throw new InternalServerException(ErrorMessage.AiWorker.ERR_UNAVAILABLE);
         }
@@ -121,6 +133,13 @@ public class AiWorkerClientImpl implements AiWorkerClient {
                 .filter(skill -> lowerText.contains(skill.toLowerCase(Locale.ROOT)))
                 .forEach(skills::add);
         return new ArrayList<>(skills);
+    }
+
+    private static RestTemplate createRestTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(CONNECT_TIMEOUT);
+        requestFactory.setReadTimeout(READ_TIMEOUT);
+        return new RestTemplate(requestFactory);
     }
 
     private boolean containsIgnoreCase(List<String> values, String target) {

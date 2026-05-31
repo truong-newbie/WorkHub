@@ -131,10 +131,12 @@ public class ScreeningServiceImpl implements ScreeningService {
 
     private String buildJobDescription(Job job) {
         return String.join("\n",
-                nullToEmpty(job.getTitle()),
-                nullToEmpty(job.getDescription()),
-                nullToEmpty(job.getRequirement()),
-                nullToEmpty(job.getBenefit())
+                "Title: " + nullToEmpty(job.getTitle()),
+                "Description: " + nullToEmpty(job.getDescription()),
+                "Requirements: " + nullToEmpty(job.getRequirement()),
+                "Benefits: " + nullToEmpty(job.getBenefit()),
+                "Experience level: " + (job.getLevel() == null ? "" : job.getLevel().name()),
+                "Experience years: " + (job.getExperienceYears() == null ? "" : job.getExperienceYears())
         );
     }
 

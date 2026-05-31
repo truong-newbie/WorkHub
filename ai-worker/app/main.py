@@ -1,11 +1,15 @@
-from fastapi import FastAPI, File, Form, UploadFile
+import logging
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
+from app.services.analysis_service import analyze_resume_text
+from app.services.embedding_service import EmbeddingModelError, SemanticInputError
 from app.services.parser_service import parse_pdf
-from app.services.semantic_service import calculate_semantic_score
-from app.services.skill_service import extract_skills
+from app.services.skill_service import parse_required_skills
 
 app = FastAPI(title="WorkHub AI Worker")
+LOGGER = logging.getLogger(__name__)
 
 
 class AiResumeAnalysisResponse(BaseModel):
@@ -17,6 +21,9 @@ class AiResumeAnalysisResponse(BaseModel):
     extra_skills: list[str]
     skill_score: float
     semantic_score: float
+    final_score: float
+    semantic_status: str
+    semantic_reason: str | None = None
     ai_summary: str | None = None
 
 
@@ -24,25 +31,31 @@ class AiResumeAnalysisResponse(BaseModel):
 async def analyze_resume(
     file: UploadFile = File(...),
     job_description: str = Form(...),
+    required_skills: str | None = Form(None),
 ):
-    file_bytes = await file.read()
-    raw_text = parse_pdf(file_bytes) if file.filename.lower().endswith(".pdf") else file_bytes.decode("utf-8", errors="ignore")
-    resume_skills = extract_skills(raw_text)
-    job_skills = extract_skills(job_description)
-
-    matched = [skill for skill in job_skills if skill.lower() in {item.lower() for item in resume_skills}]
-    missing = [skill for skill in job_skills if skill.lower() not in {item.lower() for item in resume_skills}]
-    extra = [skill for skill in resume_skills if skill.lower() not in {item.lower() for item in job_skills}]
-    skill_score = (len(matched) / len(job_skills) * 100) if job_skills else 0.0
-
-    return AiResumeAnalysisResponse(
-        raw_text=raw_text,
-        resume_skills=resume_skills,
-        job_skills=job_skills,
-        matched_skills=matched,
-        missing_skills=missing,
-        extra_skills=extra,
-        skill_score=round(skill_score, 2),
-        semantic_score=calculate_semantic_score(raw_text, job_description),
-        ai_summary=None,
-    )
+    try:
+        file_bytes = await file.read()
+        file_name = file.filename or ""
+        raw_text = (
+            parse_pdf(file_bytes)
+            if file_name.lower().endswith(".pdf")
+            else file_bytes.decode("utf-8", errors="ignore")
+        )
+        analysis = analyze_resume_text(
+            raw_text,
+            job_description,
+            parse_required_skills(required_skills),
+        )
+        return AiResumeAnalysisResponse(**analysis)
+    except SemanticInputError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EmbeddingModelError as exc:
+        LOGGER.exception("ATS embedding model is unavailable")
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        LOGGER.exception("Could not parse or analyze resume")
+        raise HTTPException(
+            status_code=422, detail="Could not parse or analyze resume file"
+        ) from exc

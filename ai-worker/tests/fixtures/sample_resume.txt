@@ -1,0 +1,2 @@
+Backend engineer experienced with Java, Spring Boot, MySQL, and Docker.
+Implemented secure REST APIs with authentication and token-based authorization.

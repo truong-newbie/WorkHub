@@ -34,6 +34,15 @@ public class AiResumeAnalysisResponse {
     @JsonProperty("semantic_score")
     private Double semanticScore;
 
+    @JsonProperty("final_score")
+    private Double finalScore;
+
+    @JsonProperty("semantic_status")
+    private String semanticStatus;
+
+    @JsonProperty("semantic_reason")
+    private String semanticReason;
+
     @JsonProperty("ai_summary")
     private String aiSummary;
 }
