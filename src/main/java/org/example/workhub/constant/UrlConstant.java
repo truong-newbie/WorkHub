@@ -180,4 +180,17 @@ public class UrlConstant {
     }
   }
 
+  public static class RecruiterRequest {
+    private static final String PRE_FIX = "/recruiter-requests";
+
+    public static final String BASE = PRE_FIX;
+    public static final String ME = PRE_FIX + "/me";
+    public static final String ID = PRE_FIX + "/{requestId}";
+    public static final String APPROVE = ID + "/approve";
+    public static final String REJECT = ID + "/reject";
+
+    private RecruiterRequest() {
+    }
+  }
+
 }
