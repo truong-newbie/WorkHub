@@ -20,10 +20,12 @@ import org.example.workhub.domain.dto.response.UserResponse;
 import org.example.workhub.domain.dto.response.UserStatisticsResponse;
 import org.example.workhub.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -147,12 +149,13 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Avatar uploaded successfully"),
             @ApiResponse(responseCode = "401", description = "Not authenticated")
     })
-    @PutMapping(UrlConstant.User.UPLOAD_AVATAR)
+    @PutMapping(value = UrlConstant.User.UPLOAD_AVATAR, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> uploadAvatar(
-            @RequestBody @Parameter(description = "Avatar URL") java.util.Map<String, String> request) {
-        String avatarUrl = request.get("avatarUrl");
-        return VsResponseUtil.success(userService.uploadAvatar(avatarUrl));
+            @RequestPart(value = "avatar", required = false) @Parameter(description = "Avatar image file") MultipartFile avatar,
+            @RequestPart(value = "file", required = false) @Parameter(description = "Avatar image file alias") MultipartFile file) {
+        MultipartFile avatarFile = avatar != null ? avatar : file;
+        return VsResponseUtil.success(userService.uploadAvatar(avatarFile));
     }
 
     // ========== Admin APIs ==========

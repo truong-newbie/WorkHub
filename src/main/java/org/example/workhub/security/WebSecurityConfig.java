@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/v1/user/me/**").authenticated()
                     .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/notifications/**").authenticated()
+                    .requestMatchers("/api/v1/recruiter-requests/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/v1/jobs/search/reindex").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.GET, "/api/v1/jobs/search/**").authenticated()
                     // Company endpoints

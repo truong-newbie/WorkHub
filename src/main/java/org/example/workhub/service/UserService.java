@@ -7,6 +7,7 @@ import org.example.workhub.domain.dto.response.UserResponse;
 import org.example.workhub.domain.dto.response.UserStatisticsResponse;
 import org.example.workhub.domain.entity.User;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
@@ -28,7 +29,7 @@ public interface UserService {
 
     void changePassword(ChangePasswordRequest request);
 
-    UserResponse uploadAvatar(String avatarUrl);
+    UserResponse uploadAvatar(MultipartFile avatar);
 
     // ========== Admin APIs ==========
     void lockUser(String id, UserStatusRequest request);
