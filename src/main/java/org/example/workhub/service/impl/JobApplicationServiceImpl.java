@@ -84,6 +84,12 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             throw new BadRequestException(ErrorMessage.Job.ERR_EXPIRED_INVALID);
         }
 
+        Resume resume = resumeRepository.findByIdAndDeletedFalse(request.getResumeId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.Resume.ERR_NOT_FOUND));
+        if (resume.getUser() == null || !currentUser.getId().equals(resume.getUser().getId())) {
+            throw new ForbiddenException(ErrorMessage.Application.ERR_RESUME_NOT_OWNER);
+        }
+
         // Check if already applied
         if (applicationRepository.existsByJobIdAndUserIdAndDeletedFalse(jobId, currentUser.getId())) {
             throw new ConflictException(ErrorMessage.Application.ERR_ALREADY_APPLIED);
@@ -93,8 +99,9 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         JobApplication application = new JobApplication();
         application.setUser(user);
         application.setJob(job);
+        application.setResume(resume);
         application.setCoverLetter(request.getCoverLetter());
-        application.setStatus(StatusEnum.PENDING);
+        application.setStatus(StatusEnum.APPLIED);
         application.setAppliedAt(Instant.now());
 
         JobApplication saved = applicationRepository.save(application);
@@ -116,8 +123,8 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         JobApplication application = applicationRepository.findByJobIdAndUserId(jobId, currentUser.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.Application.ERR_NOT_FOUND_ID));
 
-        // Can only withdraw PENDING applications
-        if (application.getStatus() != StatusEnum.PENDING) {
+        // Can only withdraw newly applied/pending applications
+        if (application.getStatus() != StatusEnum.PENDING && application.getStatus() != StatusEnum.APPLIED) {
             throw new BadRequestException(ErrorMessage.Application.ERR_CANNOT_WITHDRAW);
         }
 
@@ -197,7 +204,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         UserPrincipal currentUser = getCurrentUserPrincipal();
         User reviewer = getUserFromPrincipal(currentUser);
 
-        JobApplication application = applicationRepository.findById(applicationId)
+        JobApplication application = applicationRepository.findByIdAndDeletedFalse(applicationId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.Application.ERR_NOT_FOUND_ID));
 
         // Check permission - recruiter of the job or admin
@@ -211,8 +218,8 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             throw new BadRequestException(ErrorMessage.INVALID_SOME_THING_FIELD);
         }
 
-        // Only recruiter review actions are allowed through this endpoint.
-        if (newStatus != StatusEnum.REVIEWING && newStatus != StatusEnum.APPROVED && newStatus != StatusEnum.REJECTED) {
+        // Only allow recruiter review statuses
+        if (newStatus == StatusEnum.PENDING || newStatus == StatusEnum.APPLIED) {
             throw new BadRequestException(ErrorMessage.INVALID_SOME_THING_FIELD);
         }
 
@@ -235,13 +242,16 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     @Override
     public AtsScreeningQueuedResponse queueAtsScreening(Long applicationId) {
         UserPrincipal currentUser = getCurrentUserPrincipal();
-        JobApplication application = applicationRepository.findById(applicationId)
+        JobApplication application = applicationRepository.findByIdAndDeletedFalse(applicationId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.Application.ERR_NOT_FOUND_ID));
         validateJobAccess(application.getJob(), currentUser);
 
-        Resume resume = resumeRepository.findShareableByCandidateId(application.getUser().getId()).stream()
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.Resume.ERR_NOT_FOUND));
+        Resume resume = application.getResume();
+        if (resume == null) {
+            resume = resumeRepository.findShareableByCandidateId(application.getUser().getId()).stream()
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.Resume.ERR_NOT_FOUND));
+        }
 
         AtsScreeningJobMessage message = AtsScreeningJobMessage.builder()
                 .eventId(UUID.randomUUID().toString())

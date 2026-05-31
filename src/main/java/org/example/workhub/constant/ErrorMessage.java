@@ -80,6 +80,16 @@ public class ErrorMessage {
     public static final String ERR_NOT_FOUND_ID = "exception.application.not.found";
     public static final String ERR_ALREADY_APPLIED = "exception.application.already.applied";
     public static final String ERR_CANNOT_WITHDRAW = "exception.application.cannot.withdraw";
+    public static final String ERR_RESUME_NOT_OWNER = "exception.application.resume.not.owner";
+    public static final String ERR_RECRUITER_PERMISSION_DENIED = "exception.application.recruiter.permission.denied";
+  }
+
+  public static class Screening{
+    public static final String ERR_NOT_FOUND = "exception.screening.not.found";
+  }
+
+  public static class AiWorker{
+    public static final String ERR_UNAVAILABLE = "exception.ai.worker.unavailable";
   }
 
   public static class Favorite{

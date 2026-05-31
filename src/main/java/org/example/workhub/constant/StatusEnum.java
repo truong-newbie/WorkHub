@@ -1,9 +1,13 @@
 package org.example.workhub.constant;
 
 public enum StatusEnum {
+    APPLIED,
+    SCREENED,
+    SHORTLISTED,
+    INTERVIEWING,
+    HIRED,
     PENDING, // DANG CHO XU LY
     REVIEWING, // DANG XEM XET
-    SCREENED, // DA SANG LOC ATS
     APPROVED, // DA DUYET
     REJECTED // BI TU CHOI
 }
