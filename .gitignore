@@ -34,3 +34,7 @@ build/
 
 application-*.properties
 .env
+
+### Python ###
+__pycache__/
+*.py[cod]

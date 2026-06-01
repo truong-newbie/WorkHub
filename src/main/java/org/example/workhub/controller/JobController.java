@@ -70,7 +70,6 @@ public class JobController {
             @ApiResponse(responseCode = "404", description = "Job not found")
     })
     @GetMapping(UrlConstant.Job.ID)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getJobById(
             @PathVariable @Parameter(description = "Job ID") Long id) {
         return VsResponseUtil.success(jobService.getJobById(id));

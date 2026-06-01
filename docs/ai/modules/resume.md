@@ -33,6 +33,11 @@ Resume includes file metadata, public/default flags, soft delete, summary, ATS s
 
 After upload or file replacement, `ResumeServiceImpl` publishes `ResumeParsingJobMessage`. The consumer loads the resume and skips if `parsedContent` already exists.
 
+Resume documents are uploaded to Cloudinary with `resource_type=raw` so ATS
+workers can download PDF, DOC, and DOCX files from their persisted URL. Existing
+documents uploaded under another Cloudinary resource type may need to be
+uploaded again.
+
 ## AI Notes
 
 Do not break upload response timing. Resume parsing should remain asynchronous.

@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -63,18 +64,26 @@ public class WebSecurityConfig {
                     // Job recommendation endpoints
                     .requestMatchers(HttpMethod.GET, "/api/v1/jobs/latest").permitAll()
                     // Job endpoints - Public view, authenticated search
+                    .requestMatchers(new RegexRequestMatcher("^/api/v1/job/\\d+$", "GET")).permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/job/**").authenticated()
+                    // Candidate job actions must be declared before the general job write rules.
+                    .requestMatchers(HttpMethod.POST, "/api/v1/job/*/apply").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/job/*/apply").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/job/*/favorite").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/job/*/favorite").authenticated()
                     // Job write operations - Recruiter/Admin only
                     .requestMatchers(HttpMethod.POST, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/job/**").hasAnyRole("RECRUITER", "ADMIN")
                     // Job Application endpoints
-                    .requestMatchers(HttpMethod.POST, "/api/v1/job/*/apply").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/api/v1/job/*/apply").authenticated()
                     .requestMatchers("/api/v1/job/*/applications/**").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers("/api/v1/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/candidate/jobs/*/apply").hasAnyRole("CANDIDATE", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/candidate/applications").hasAnyRole("CANDIDATE", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/jobs/*/applications").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers("/api/v1/recruiter/jobs/*/screening-results").hasAnyRole("RECRUITER", "ADMIN")
                     // Favorite Job endpoints - All authenticated users
-                    .requestMatchers("/api/v1/job/*/favorite/**").authenticated()
                     .requestMatchers("/api/v1/jobs/favorites").authenticated()
                     // Resume endpoints
                     .requestMatchers("/api/v1/resume/**").authenticated()

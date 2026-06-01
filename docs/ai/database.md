@@ -71,3 +71,20 @@ RabbitMQ is the transport. The DB email queue remains the audit/idempotency laye
 ## Database Rule For AI Work
 
 Before using a field, inspect the actual entity class. Do not rely only on old docs because some historical context may describe modules that are only partially present in source.
+
+## ATS Screening Result Explanation Fields
+
+`tbl_screening_results` persists ATS scores and the optional explainable AI layer.
+The explanation fields are nullable so older rows remain valid:
+
+```text
+strengths
+weaknesses
+recommendation
+confidence
+explanation_status
+explanation_reason
+```
+
+`strengths` and `weaknesses` are JSON arrays stored as `TEXT`. The existing
+`ai_summary` column stores the recruiter-readable explanation summary.

@@ -35,6 +35,9 @@ public class JobApplicationResponse {
     @Schema(description = "Review note")
     private String reviewNote;
 
+    @Schema(description = "Resume ID used for this application", example = "1")
+    private Long resumeId;
+
     @Schema(description = "Job info")
     private JobBasicInfo job;
 
