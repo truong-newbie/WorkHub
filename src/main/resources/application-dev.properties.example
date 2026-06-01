@@ -1,0 +1,48 @@
+# Copy this file to application-dev.properties for local development.
+# Do not commit application-dev.properties because it contains local secrets.
+
+# Database
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/workhub?createDatabaseIfNotExist=true}
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:password}
+
+# JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# JWT
+jwt.secret=${JWT_SECRET:replace-this-with-a-long-random-secret-for-local-development-only}
+jwt.access.expiration_time=60
+jwt.refresh.expiration_time=1440
+
+# Cloudinary. Empty values allow startup, but uploads require real credentials.
+cloudinary.cloud_name=${CLOUDINARY_CLOUD_NAME:}
+cloudinary.api_key=${CLOUDINARY_API_KEY:}
+cloudinary.api_secret=${CLOUDINARY_API_SECRET:}
+
+# Mail. Matching-job emails require valid SMTP credentials.
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME:}
+spring.mail.password=${MAIL_PASSWORD:}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Frontend URLs
+app.frontend-url=${FRONTEND_URL:http://localhost:5173}
+app.backend-url=${BACKEND_URL:http://localhost:8080/api/v1}
+auth.oauth2.frontend-callback-url=${OAUTH2_FRONTEND_CALLBACK_URL:http://localhost:5173/auth/oauth/callback}
+
+# Background email worker
+subscriber.mail.cron=0 0 */6 * * *
+email.queue.worker.initial-delay-ms=30000
+email.queue.worker.delay-ms=60000
+email.queue.worker.enabled=false
+
+# AI worker
+ai.worker.base-url=${AI_WORKER_BASE_URL:http://localhost:8000}
+ai.worker.mock-enabled=${AI_WORKER_MOCK_ENABLED:false}
+

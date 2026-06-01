@@ -6,13 +6,12 @@ services:
       - SYS_NICE
     restart: always
     environment:
-      - MYSQL_DATABASE=testdb
-      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=workhub
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     networks:
       - default
   elasticsearch:
@@ -73,6 +72,9 @@ services:
     environment:
       - AI_WORKER_BASE_URL=http://ai-worker:8000
       - AI_WORKER_MOCK_ENABLED=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/workhub?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
       - ELASTICSEARCH_URIS=http://elasticsearch:9200
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
