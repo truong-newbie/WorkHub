@@ -31,6 +31,13 @@ public class ScreeningResultResponse {
     private List<String> matchedSkills;
     private List<String> missingSkills;
     private List<String> extraSkills;
+    private List<String> strengths;
+    private List<String> weaknesses;
+    private String recommendation;
+    private Double confidence;
+    private String summary;
+    private String explanationStatus;
+    private String explanationReason;
     private String aiSummary;
     private LocalDateTime screenedAt;
 }

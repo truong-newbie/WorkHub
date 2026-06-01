@@ -16,6 +16,9 @@ public interface ScreeningResultRepository extends JpaRepository<ScreeningResult
 
     boolean existsByApplicationId(Long applicationId);
 
+    Optional<ScreeningResult> findFirstByApplicationResumeIdAndApplicationJobIdAndExplanationStatusOrderByIdDesc(
+            Long resumeId, Long jobId, String explanationStatus);
+
     @Query("""
             SELECT sr FROM ScreeningResult sr
             WHERE sr.application.job.id = :jobId

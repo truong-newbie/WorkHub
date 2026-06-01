@@ -54,6 +54,24 @@ public class ScreeningResult extends DateAuditing {
     @Column(name = "ai_summary", columnDefinition = "TEXT")
     private String aiSummary;
 
+    @Column(name = "strengths", columnDefinition = "TEXT")
+    private String strengths;
+
+    @Column(name = "weaknesses", columnDefinition = "TEXT")
+    private String weaknesses;
+
+    @Column(name = "recommendation", length = 20)
+    private String recommendation;
+
+    @Column(name = "confidence")
+    private Double confidence;
+
+    @Column(name = "explanation_status", length = 40)
+    private String explanationStatus;
+
+    @Column(name = "explanation_reason", columnDefinition = "TEXT")
+    private String explanationReason;
+
     @Column(name = "raw_text", columnDefinition = "LONGTEXT")
     private String rawText;
 }

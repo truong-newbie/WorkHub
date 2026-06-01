@@ -53,6 +53,11 @@ services:
       - PYTHONUNBUFFERED=1
       - AI_WORKER_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
       - AI_WORKER_MAX_TEXT_LENGTH=8000
+      - LLM_ENABLED=${LLM_ENABLED:-false}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+      - GEMINI_TIMEOUT_SECONDS=${GEMINI_TIMEOUT_SECONDS:-30}
+      - GEMINI_MAX_TEXT_LENGTH=${GEMINI_MAX_TEXT_LENGTH:-12000}
     volumes:
       - ai_worker_model_cache:/root/.cache/huggingface
     networks:

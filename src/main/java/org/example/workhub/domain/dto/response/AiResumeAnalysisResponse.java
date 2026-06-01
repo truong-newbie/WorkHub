@@ -43,6 +43,22 @@ public class AiResumeAnalysisResponse {
     @JsonProperty("semantic_reason")
     private String semanticReason;
 
+    private List<String> strengths;
+
+    private List<String> weaknesses;
+
+    private String recommendation;
+
+    private Double confidence;
+
+    private String summary;
+
+    @JsonProperty("explanation_status")
+    private String explanationStatus;
+
+    @JsonProperty("explanation_reason")
+    private String explanationReason;
+
     @JsonProperty("ai_summary")
     private String aiSummary;
 }

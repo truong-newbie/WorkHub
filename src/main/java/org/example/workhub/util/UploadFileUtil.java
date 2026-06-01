@@ -74,7 +74,7 @@ public class UploadFileUtil {
       } else if (contentType.startsWith("video/")) {
         return "video";
       } else {
-        return "auto";
+        return "raw";
       }
     } else {
       throw new UploadFileException(ErrorMessage.Resume.ERR_FILE_INVALID);

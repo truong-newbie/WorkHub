@@ -35,6 +35,13 @@ public interface ScreeningResultMapper {
                 .matchedSkills(readList(result.getMatchedSkills()))
                 .missingSkills(readList(result.getMissingSkills()))
                 .extraSkills(readList(result.getExtraSkills()))
+                .strengths(readList(result.getStrengths()))
+                .weaknesses(readList(result.getWeaknesses()))
+                .recommendation(result.getRecommendation())
+                .confidence(result.getConfidence())
+                .summary(result.getAiSummary())
+                .explanationStatus(result.getExplanationStatus())
+                .explanationReason(result.getExplanationReason())
                 .aiSummary(result.getAiSummary())
                 .screenedAt(result.getCreatedDate())
                 .build();

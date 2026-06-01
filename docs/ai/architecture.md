@@ -44,7 +44,7 @@ API base path:
 - Job Application
 - Resume
 - Subscriber
-- ATS screening with RabbitMQ and local embedding-based AI worker
+- ATS screening with RabbitMQ, local embeddings, and optional Gemini explanations
 - Assessment
 - Recommendation
 - Notification
@@ -67,7 +67,7 @@ API base path:
 - Elasticsearch: job search index.
 - SMTP: email delivery through existing `EmailService`.
 - WebSocket/STOMP: realtime notifications.
-- AI worker: FastAPI service for resume parsing, keyword matching, and local embedding-based ATS semantic scoring.
+- AI worker: FastAPI service for resume parsing, keyword matching, local embedding-based ATS semantic scoring, and optional Gemini 2.5 Flash recruiter explanations.
 
 ## AI Loading Rule
 

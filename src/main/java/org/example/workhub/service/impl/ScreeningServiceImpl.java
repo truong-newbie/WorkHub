@@ -69,11 +69,21 @@ public class ScreeningServiceImpl implements ScreeningService {
 
         Long applicationId = application.getId();
         Job job = application.getJob();
+        ScreeningResult cachedResult = screeningResultRepository
+                .findFirstByApplicationResumeIdAndApplicationJobIdAndExplanationStatusOrderByIdDesc(
+                        application.getResume().getId(), job.getId(), "CALCULATED")
+                .orElse(null);
+        if (cachedResult != null) {
+            return reuseCachedResult(application, cachedResult);
+        }
+
         List<String> jobSkills = job.getSkills() == null
                 ? List.of()
                 : job.getSkills().stream().map(Skill::getName).toList();
         AiResumeAnalysisResponse aiResponse = aiWorkerClient.analyzeResume(
                 application.getResume(),
+                job.getId(),
+                job.getTitle(),
                 buildJobDescription(job),
                 jobSkills
         );
@@ -89,9 +99,30 @@ public class ScreeningServiceImpl implements ScreeningService {
         result.setMatchedSkills(toJson(aiResponse.getMatchedSkills()));
         result.setMissingSkills(toJson(aiResponse.getMissingSkills()));
         result.setExtraSkills(toJson(aiResponse.getExtraSkills()));
-        result.setAiSummary(aiResponse.getAiSummary());
+        result.setStrengths(toJson(aiResponse.getStrengths()));
+        result.setWeaknesses(toJson(aiResponse.getWeaknesses()));
+        result.setRecommendation(aiResponse.getRecommendation());
+        result.setConfidence(aiResponse.getConfidence());
+        result.setExplanationStatus(aiResponse.getExplanationStatus());
+        result.setExplanationReason(aiResponse.getExplanationReason());
+        result.setAiSummary(firstNonBlank(aiResponse.getSummary(), aiResponse.getAiSummary()));
         result.setRawText(aiResponse.getRawText());
 
+        return saveCompletedResult(application, result);
+    }
+
+    private ScreeningResultResponse reuseCachedResult(JobApplication application, ScreeningResult cachedResult) {
+        ScreeningResult result = screeningResultRepository.findByApplicationId(application.getId())
+                .orElseGet(ScreeningResult::new);
+        if (result.getId() == null || !result.getId().equals(cachedResult.getId())) {
+            copyResult(cachedResult, result);
+        }
+        result.setApplication(application);
+        return saveCompletedResult(application, result);
+    }
+
+    private ScreeningResultResponse saveCompletedResult(JobApplication application, ScreeningResult result) {
+        Job job = application.getJob();
         application.setStatus(StatusEnum.SCREENED);
         applicationRepository.save(application);
         ScreeningResult savedResult = screeningResultRepository.save(result);
@@ -101,6 +132,25 @@ public class ScreeningServiceImpl implements ScreeningService {
                 String.valueOf(savedResult.getId())
         ));
         return screeningResultMapper.toResponse(savedResult);
+    }
+
+    private void copyResult(ScreeningResult source, ScreeningResult target) {
+        target.setTotalScore(source.getTotalScore());
+        target.setSkillScore(source.getSkillScore());
+        target.setSemanticScore(source.getSemanticScore());
+        target.setExperienceScore(source.getExperienceScore());
+        target.setEducationScore(source.getEducationScore());
+        target.setMatchedSkills(source.getMatchedSkills());
+        target.setMissingSkills(source.getMissingSkills());
+        target.setExtraSkills(source.getExtraSkills());
+        target.setStrengths(source.getStrengths());
+        target.setWeaknesses(source.getWeaknesses());
+        target.setRecommendation(source.getRecommendation());
+        target.setConfidence(source.getConfidence());
+        target.setExplanationStatus(source.getExplanationStatus());
+        target.setExplanationReason(source.getExplanationReason());
+        target.setAiSummary(source.getAiSummary());
+        target.setRawText(source.getRawText());
     }
 
     @Override
@@ -142,6 +192,10 @@ public class ScreeningServiceImpl implements ScreeningService {
 
     private String nullToEmpty(String value) {
         return value == null ? "" : value;
+    }
+
+    private String firstNonBlank(String preferred, String fallback) {
+        return preferred == null || preferred.isBlank() ? fallback : preferred;
     }
 
     private String toJson(List<String> values) {
