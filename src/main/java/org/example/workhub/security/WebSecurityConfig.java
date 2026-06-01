@@ -48,6 +48,11 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/v1/companies/me").authenticated()
                     .requestMatchers(HttpMethod.PUT, "/api/v1/companies/me").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.GET, "/api/v1/companies/*/statistics").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/companies/*/join-requests").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/companies/join-requests/me").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/companies/*/join-requests").hasAnyRole("RECRUITER", "ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/join-requests/*/approve",
+                            "/api/v1/companies/join-requests/*/reject").hasAnyRole("RECRUITER", "ADMIN")
                     .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*/enable", "/api/v1/companies/*/disable",
                             "/api/v1/companies/*/approve", "/api/v1/companies/*/reject").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/api/v1/companies/*/logo", "/api/v1/companies/*/cover").hasAnyRole("RECRUITER", "ADMIN")
