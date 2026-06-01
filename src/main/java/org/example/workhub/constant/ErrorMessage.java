@@ -178,4 +178,13 @@ public class ErrorMessage {
     public static final String ERR_CANDIDATE_NOT_ELIGIBLE = "recruiter.request.candidate.not.eligible";
   }
 
+  public static class Chat {
+    public static final String ERR_CONVERSATION_NOT_FOUND = "exception.chat.conversation.not.found";
+    public static final String ERR_CANDIDATE_ONLY = "exception.chat.candidate.only";
+    public static final String ERR_AI_UNAVAILABLE = "exception.chat.ai.unavailable";
+    public static final String ERR_DISABLED = "exception.chat.disabled";
+    public static final String ERR_RATE_LIMIT = "exception.chat.rate.limit";
+    public static final String ERR_MESSAGE_TOO_LONG = "exception.chat.message.too.long";
+  }
+
 }

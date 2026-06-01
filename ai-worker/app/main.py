@@ -4,12 +4,20 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from app.services.analysis_service import analyze_resume_text
+from app.models.chat_models import (
+    ChatGroundedResponse,
+    ChatGroundedResponseRequest,
+    ChatIntentRequest,
+    ChatIntentResponse,
+)
+from app.services.chat_service import ChatAiUnavailableError, ChatService
 from app.services.embedding_service import EmbeddingModelError, SemanticInputError
 from app.services.parser_service import ResumeParsingError, parse_resume_file
 from app.services.skill_service import parse_required_skills
 
 app = FastAPI(title="WorkHub AI Worker")
 LOGGER = logging.getLogger(__name__)
+chat_service = ChatService()
 
 
 class AiResumeAnalysisResponse(BaseModel):
@@ -70,3 +78,19 @@ async def analyze_resume(
         raise HTTPException(
             status_code=422, detail="Could not parse or analyze resume file"
         ) from exc
+
+
+@app.post("/api/v1/ai/chat/intent", response_model=ChatIntentResponse)
+def classify_chat_intent(request: ChatIntentRequest):
+    try:
+        return chat_service.classify_intent(request)
+    except ChatAiUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/api/v1/ai/chat/respond", response_model=ChatGroundedResponse)
+def generate_chat_response(request: ChatGroundedResponseRequest):
+    try:
+        return chat_service.generate_response(request)
+    except ChatAiUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

@@ -141,4 +141,11 @@ public class GlobalExceptionHandler {
     return VsResponseUtil.error(ex.getStatus(), message);
   }
 
+  @ExceptionHandler(TooManyRequestsException.class)
+  public ResponseEntity<RestData<?>> handleTooManyRequestsException(TooManyRequestsException ex) {
+    String message = messageSource.getMessage(ex.getMessage(), null, LocaleContextHolder.getLocale());
+    log.warn(message);
+    return VsResponseUtil.error(ex.getStatus(), message);
+  }
+
 }
