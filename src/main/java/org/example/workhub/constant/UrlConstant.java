@@ -193,4 +193,16 @@ public class UrlConstant {
     }
   }
 
+  public static class Chat {
+    private static final String PRE_FIX = "/chat";
+
+    public static final String MESSAGES = PRE_FIX + "/messages";
+    public static final String CONVERSATIONS = PRE_FIX + "/conversations";
+    public static final String CONVERSATION_ID = CONVERSATIONS + "/{conversationId}";
+    public static final String CONVERSATION_MESSAGES = CONVERSATION_ID + "/messages";
+
+    private Chat() {
+    }
+  }
+
 }

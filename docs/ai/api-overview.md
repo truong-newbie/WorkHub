@@ -20,6 +20,7 @@ Base path:
 - Recruiter assessment: `/recruiter/**`
 - Notification: `/notifications/**`
 - Job search: `/jobs/search/**`
+- Candidate chatbot: `/chat/**`
 
 ## Response Wrapper
 

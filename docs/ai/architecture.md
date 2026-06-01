@@ -50,6 +50,7 @@ API base path:
 - Notification
 - Elasticsearch job search
 - RabbitMQ background queue system
+- Candidate chatbot grounded in WorkHub data with optional Gemini phrasing
 
 ## Important Integration Patterns
 
@@ -68,6 +69,7 @@ API base path:
 - SMTP: email delivery through existing `EmailService`.
 - WebSocket/STOMP: realtime notifications.
 - AI worker: FastAPI service for resume parsing, keyword matching, local embedding-based ATS semantic scoring, and optional Gemini 2.5 Flash recruiter explanations.
+- Candidate chatbot: synchronous Spring Boot orchestration with bounded sanitized context and optional Gemini intent classification and phrasing.
 
 ## AI Loading Rule
 

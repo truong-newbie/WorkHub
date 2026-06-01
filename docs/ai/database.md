@@ -15,6 +15,8 @@
 - `tbl_notifications`
 - assessment tables
 - recommendation behavior tables
+- `tbl_chat_conversations`
+- `tbl_chat_messages`
 
 ## ID Types
 
@@ -88,3 +90,11 @@ explanation_reason
 
 `strengths` and `weaknesses` are JSON arrays stored as `TEXT`. The existing
 `ai_summary` column stores the recruiter-readable explanation summary.
+
+## Candidate Chatbot Tables
+
+`tbl_chat_conversations` stores candidate-owned soft-deletable conversations.
+
+`tbl_chat_messages` stores user and assistant messages, allowlisted intent,
+response mode, and serialized trusted source/action metadata. The chatbot does
+not store or send full entities to Gemini.
